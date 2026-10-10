@@ -10,7 +10,7 @@ export default function ProjectEntry({ title, description, contributors, image }
   return (
     // Bottom padding scales with the screenshot's height so the border always sits below it
     <article
-      className={`border-b-2 border-[#d4d4d4] ${image ? "pb-[max(2.5rem,calc(24.5%-6rem))]" : "pb-10"}`}
+      className={`border-b-2 border-[#d4d4d4] ${image ? "pb-[max(1.5rem,calc(24.5%-8.5rem))]" : "pb-10"}`}
     >
       <h1 className="bg-[linear-gradient(to_bottom,#111111,#3d3d3d)] bg-clip-text text-6xl font-bold tracking-tight text-transparent [filter:drop-shadow(0_6px_14px_rgba(0,0,0,0.10))]">
         {title}
