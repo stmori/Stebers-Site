@@ -30,13 +30,14 @@ def _parse_json(text):
     return None
 
 
-def look(image_data_uri, question):
+def look(image_data_uri, question, history=None):
     if config.MOCK_LLM:
         return dict(is_medical_image=True, modality="Chest X-ray (PA) [mock]", body_region="Chest",
                     observations=["Mock mode: no model was called", "Possible right upper lobe opacity"],
                     short_answer="Mock answer. Set MOCK_LLM=0 and an API key for real output.",
                     search_terms=["pneumonia", "pleural effusion"])
-    raw = provider.look(image_data_uri, question, prompts.VISION_SYSTEM, prompts.VISION_USER.format(question=question))
+    raw = provider.look(image_data_uri, question, prompts.VISION_SYSTEM,
+                       prompts.VISION_USER.format(history=prompts.format_history(history), question=question))
     f = _parse_json(raw) or {}
     obs = f.get("observations") or []
     if isinstance(obs, str):
@@ -53,14 +54,14 @@ def look(image_data_uri, question):
                 search_terms=terms)
 
 
-def answer(question, findings, hits):
+def answer(question, findings, hits, history=None):
     if config.MOCK_LLM:
         return ("Mock answer: the image appears to show an opacity in the right upper lung [1]. "
                 "Conditions like this are described in the reference passages [2]. "
                 "A qualified clinician should interpret any medical image.")
-    msg = prompts.ANSWER_USER.format(question=question, modality=findings["modality"],
-                                     body_region=findings["body_region"],
-                                     observations="; ".join(findings["observations"]) or "none reported",
+    msg = prompts.ANSWER_USER.format(history=prompts.format_history(history), question=question,
+                                     modality=findings["modality"], body_region=findings["body_region"],
+                                     observations="\n".join(f"- {o}" for o in findings["observations"]) or "- none reported",
                                      short_answer=findings["short_answer"],
                                      sources=prompts.format_sources(hits))
     return provider.answer(prompts.ANSWER_SYSTEM, msg)
