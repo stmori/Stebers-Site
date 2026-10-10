@@ -17,7 +17,7 @@ git push -u origin jake/short-topic            # 4. push the branch
 
 - **Never push to `main` directly.** Everything goes through a pull request.
 - **One topic per branch.** Small PRs get reviewed and merged faster and conflict less.
-- **Stay in your folder.** `site/` is Evanton's and `projects/med-vqa/` is Jake's. If you need a change in the other's folder, ask or flag it in the PR.
+- **Stay in your folder.** The site pages and `site/projects/med-vqa/frontend/` are Evanton's; the rest of `site/projects/med-vqa/` is Jake's. If you need a change in the other's folder, ask or flag it in the PR.
 - **Never commit secrets.** No API keys, tokens, passwords or `.env` files. Commit `.env.example` with blank values instead. If a secret is ever pushed, rotate it immediately; deleting the commit isn't enough.
 - **No big files.** Datasets, search indexes, model weights and build output stay out of git (see `.gitignore`).
 
