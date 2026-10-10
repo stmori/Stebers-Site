@@ -1,6 +1,6 @@
 # jake_projects
 
-Content for Jake Weber's portfolio: one folder per project, plus a profile. **This folder holds content only.** The website (`web/`) decides how to show it, so the design can change without touching the content, and adding a project means adding a folder.
+Content for Jake Weber's portfolio: one folder per project, plus a profile. **This folder holds content only.** The website (`web/app/jake/`) renders it at `/jake/` at build time, so the design can change without touching the content, and adding a project means adding a folder.
 
 ```
 jake_projects/
@@ -31,7 +31,7 @@ Every project uses the same YAML fields. Optional fields can be missing or empty
 
 | field | type | meaning |
 |---|---|---|
-| `slug` | string | URL-safe id; same as the folder name. Suggested page: `/projects/<slug>/` |
+| `slug` | string | URL-safe id; same as the folder name. Rendered at `/jake/<slug>/` |
 | `title` | string | Full title |
 | `short_title` | string | For cards and navigation |
 | `order` | int | Display order on the portfolio page (1 = first) |

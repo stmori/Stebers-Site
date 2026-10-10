@@ -4,3 +4,5 @@ out/
 .env.local
 next-env.d.ts
 *.tsbuildinfo
+# copied from ../jake_projects by scripts/copy-jake-media.mjs
+public/jake/

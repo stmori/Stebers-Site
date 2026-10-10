@@ -1,0 +1,15 @@
+/* Styles for the Markdown write-ups rendered from jake_projects/ (no typography plugin needed). */
+.jake-prose { line-height: 1.7; color: var(--color-ink); }
+.jake-prose > * + * { margin-top: 1rem; }
+.jake-prose h2 { margin-top: 2.25rem; font-size: 1.25rem; font-weight: 650; letter-spacing: -0.01em; }
+.jake-prose h3 { margin-top: 1.5rem; font-size: 1.05rem; font-weight: 600; }
+.jake-prose ul { list-style: disc; padding-left: 1.4rem; }
+.jake-prose ol { list-style: decimal; padding-left: 1.4rem; }
+.jake-prose li + li { margin-top: 0.35rem; }
+.jake-prose a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+.jake-prose strong { font-weight: 650; }
+.jake-prose code { font-size: 0.9em; background: var(--color-raised); padding: 0.1em 0.35em; border-radius: 4px; }
+.jake-prose table { width: 100%; border-collapse: collapse; font-size: 0.92rem; display: block; overflow-x: auto; }
+.jake-prose th, .jake-prose td { border: 1px solid var(--color-rule); padding: 0.45rem 0.6rem; text-align: left; white-space: nowrap; }
+.jake-prose th { background: var(--color-raised); font-weight: 600; }
+.jake-prose blockquote { border-left: 3px solid var(--color-rule); padding-left: 1rem; color: var(--color-muted); }
