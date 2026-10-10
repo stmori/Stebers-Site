@@ -18,9 +18,10 @@
   "source": "VQA-RAD test"
  },
  {
-  "file": "examples/openi_cxr_06.jpg",
-  "label": "Chest X-ray",
-  "question": "Does this chest X-ray look normal?",
-  "source": "Open-I/IU X-ray uid 1151"
+  "file": "examples/nuinsseg_pancreas_29.jpg",
+  "label": "Histology (H&E)",
+  "question": "How cellular is this tissue, and do the nuclei look abnormal?",
+  "source": "NuInsSeg (Mahbod et al. 2024, CC BY 4.0), human pancreas; not used to train the nuclei model",
+  "nuclei": true
  }
 ]
