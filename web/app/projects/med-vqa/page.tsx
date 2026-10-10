@@ -6,6 +6,7 @@ import Composer from "./components/Composer";
 import { ACCEPTED_TYPES, ask, AskError, EXAMPLES_DIR, validate } from "./lib/api";
 import examples from "./lib/examples.json";
 import type { ChatMessage, Example } from "./lib/types";
+import { priorTurns } from "./lib/history";
 import { useWindowFileDrop } from "./lib/useWindowFileDrop";
 
 const EXAMPLES = examples as Example[];
@@ -28,6 +29,8 @@ export default function MedVqaPage() {
   const urls = useRef<string[]>([]); // object URLs stay alive while the chat shows them
   const abort = useRef<AbortController | null>(null);
   const lastAsk = useRef<{ img: Img; question: string } | null>(null);
+  const messagesRef = useRef(messages); // latest chat, read when sending a follow-up
+  messagesRef.current = messages;
 
   useEffect(() => {
     const created = urls.current;
@@ -66,6 +69,7 @@ export default function MedVqaPage() {
   const run = useCallback(async (img: Img, q: string, isNewImage: boolean, retry: boolean) => {
     const pendingId = uid();
     lastAsk.current = { img, question: q };
+    const history = isNewImage ? [] : priorTurns(messagesRef.current); // follow-ups carry earlier turns
     setMessages((prev) => [
       // On retry, drop the failed answer and keep the existing question.
       ...(retry ? prev.slice(0, -1) : prev),
@@ -78,7 +82,7 @@ export default function MedVqaPage() {
 
     abort.current = new AbortController();
     try {
-      const data = await ask(img.file, q, abort.current.signal);
+      const data = await ask(img.file, q, abort.current.signal, history);
       setMessages((prev) => prev.map<ChatMessage>((m) => (m.id === pendingId ? { id: pendingId, role: "assistant", status: "done", data } : m)));
     } catch (e) {
       if ((e as Error).name === "AbortError") return;
