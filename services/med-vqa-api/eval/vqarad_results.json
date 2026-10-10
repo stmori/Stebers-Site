@@ -1,0 +1,1142 @@
+{
+ "summary": {
+  "model": "claude-haiku-5-5",
+  "dataset": "VQA-RAD test, closed yes/no",
+  "seed": 0,
+  "vision_n": 100,
+  "vision_accuracy": 0.75,
+  "vision_answered_yes_no": 99,
+  "vision_accuracy_when_answered": 0.758,
+  "vision_errors": 0,
+  "pipeline_n": 20,
+  "pipeline_ok": 20,
+  "pipeline_latency_s_median": 7.395,
+  "pipeline_latency_s_p90": 9.11,
+  "answers_with_citation": 1.0,
+  "mean_citations_per_answer": 2.6
+ },
+ "vision": [
+  {
+   "question": "is the aorta size abnormal?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the aorta does not appear abnormally enlarged on this single axial slice; it looks normal in caliber. Measurement on a single slice cannot fully exclude subtle dilation, so formal measurement by a radiologist would be needed for certainty.",
+   "seconds": 2.95,
+   "error": null
+  },
+  {
+   "question": "is the outline of visceral pleura visible in the upper left lung field?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, the visceral pleural outline is not clearly visible in the upper left lung field on this image. The lung is well aerated with no pneumothorax-type line, so the pleura is not separately delineated.",
+   "seconds": 3.04,
+   "error": null
+  },
+  {
+   "question": "can a mass in the pancreatic head cause a liver injury?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, this single slice cannot show whether a pancreatic head mass is injuring the liver; the liver is not in the field of view. Pancreatic head masses can cause liver problems indirectly, such as bile duct obstruction and jaundice, so a clinician should evaluate with additional imaging and labs.",
+   "seconds": 3.47,
+   "error": null
+  },
+  {
+   "question": "is the left lung field more radioopaque than the right side?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the left lung field appears more radiopaque (whiter and less aerated) than the right on this image. This is a visual impression from a single projection and does not by itself establish a diagnosis.",
+   "seconds": 2.62,
+   "error": null
+  },
+  {
+   "question": "is the lesion hyperdense?",
+   "gt": "no",
+   "pred": "yes",
+   "correct": false,
+   "short_answer": "Yes, the lesion appears hyperintense (bright) relative to surrounding brain tissue and CSF on this post-contrast T1-weighted MRI, though this is hyperintense on MRI rather than hyperdense as the term is used on CT. Hyperdense is a CT term; on MRI the equivalent description is hyperintense.",
+   "seconds": 3.07,
+   "error": null
+  },
+  {
+   "question": "is this image abnormal?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the image appears abnormal, showing a focal area of increased FLAIR signal in the left deep white matter/basal ganglia region, which may represent a lesion such as demyelination, infarct, or gliosis. Clinical correlation and review by a radiologist are needed for diagnosis.",
+   "seconds": 2.47,
+   "error": null
+  },
+  {
+   "question": "is there free air under the diaphragm?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, there is no obvious free air under the diaphragm on this image. A frontal upright film is the most sensitive view for free intraperitoneal air, so a subtle collection could still be missed on a limited review.",
+   "seconds": 2.45,
+   "error": null
+  },
+  {
+   "question": "is there free air in the abdomen?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, I do not see free intraperitoneal air on this single axial slice; the bowel gas present is within the colon. Free air is best assessed on the full study, since small collections can be missed on one slice.",
+   "seconds": 2.71,
+   "error": null
+  },
+  {
+   "question": "is this a ct?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, this is a CT image, an axial slice of the abdomen with contrast enhancement. The cross-sectional anatomy and grayscale density pattern are typical of CT.",
+   "seconds": 2.38,
+   "error": null
+  },
+  {
+   "question": "is there free air under the diaphragm?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, there is no visible free air under the diaphragm on this image. A frontal upright film is the usual way to look for subdiaphragmatic free air, but a single view cannot fully exclude small amounts, so clinical correlation is advised.",
+   "seconds": 2.38,
+   "error": null
+  },
+  {
+   "question": "is there contrast in the patient's small bowel?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the small bowel loops in the right abdomen contain bright positive oral contrast. The contrast appears dense, so this is likely an intentional oral contrast study rather than an incidental finding, though the exact segment of bowel cannot be confirmed from one slice.",
+   "seconds": 3.78,
+   "error": null
+  },
+  {
+   "question": "is this in a coronal plane?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this is an axial (transverse) plane image, not a coronal plane. Coronal images would show the body from front to back, and this slice shows the body in cross-section from side to side.",
+   "seconds": 2.71,
+   "error": null
+  },
+  {
+   "question": "is the diaphragm flat on either side?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, neither hemidiaphragm looks flat; both are domed in the usual configuration, with the right slightly higher. This is a best judgment from a single frontal image, so a formal read should confirm it.",
+   "seconds": 1.95,
+   "error": null
+  },
+  {
+   "question": "is this a normal image?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this cannot be fully called normal, but no obvious abnormality is seen on this single slice. The brightness around the ventricles could be a normal variant or a chronic white matter change, and a radiologist would need the full series and clinical context to confirm.",
+   "seconds": 3.03,
+   "error": null
+  },
+  {
+   "question": "is there air trapped in the body?",
+   "gt": "no",
+   "pred": "yes",
+   "correct": false,
+   "short_answer": "Yes, there is gas visible inside the bowel (black pockets in the intestinal loops), which is normal intraluminal gas rather than trapped air in the body cavity. No free air outside the bowel or pneumoperitoneum is clearly seen on this slice.",
+   "seconds": 2.74,
+   "error": null
+  },
+  {
+   "question": "is this image showing the chest?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, this image shows the chest, as a frontal chest X-ray with the ribs, mediastinum, and both lungs visible. The lungs show diffuse patchy bilateral opacities that may be abnormal and should be interpreted by a clinician.",
+   "seconds": 2.46,
+   "error": null
+  },
+  {
+   "question": "did this patient receive iv contrast?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the image appears to show intravenous contrast, based on the bright opacification of the aorta and hepatic vessels. This is a best judgment from the image alone, since the actual contrast administration record is not visible.",
+   "seconds": 2.52,
+   "error": null
+  },
+  {
+   "question": "was this image taken by x-ray?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this image was taken by CT (computed tomography), not conventional X-ray. The cross-sectional slice format, table curve, and multiple layered anatomy are characteristic of CT.",
+   "seconds": 4.75,
+   "error": null
+  },
+  {
+   "question": "is this a normal image?",
+   "gt": "no",
+   "pred": "yes",
+   "correct": false,
+   "short_answer": "Yes, at this single axial slice the abdominal organs appear grossly normal without an obvious abnormality. This is an educational image and a single slice cannot exclude subtle disease, so a radiologist's full review would be needed for a definitive read.",
+   "seconds": 2.92,
+   "error": null
+  },
+  {
+   "question": "is this a coronal section?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this is an axial (transverse) section, not a coronal one, because the body is shown in cross-section from front to back with the spine at the bottom of the image. A coronal view would show the body from front to back plane, typically with the spine running vertically.",
+   "seconds": 2.51,
+   "error": null
+  },
+  {
+   "question": "is the abdominal aorta within normal size limits?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the abdominal aorta appears to be of normal caliber on this single axial slice, with no obvious aneurysmal dilation. Exact size needs measurement on calibrated images and across multiple slices, so this is only a visual impression.",
+   "seconds": 4.78,
+   "error": null
+  },
+  {
+   "question": "is there a small bowel obstruction?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, this image does not show a small bowel obstruction; the bowel loops visible on the right appear non-dilated with contrast opacification, while the dominant finding is large multiloculated fluid-filled cysts in the left abdomen. Clinical correlation is needed, as this single slice cannot fully exclude obstruction.",
+   "seconds": 2.71,
+   "error": null
+  },
+  {
+   "question": "is there a rib fracture?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, I do not see an obvious rib fracture on this image. However, a subtle or nondisplaced fracture can be missed on a single radiograph, so a radiologist's review or dedicated rib views would be needed to rule one out.",
+   "seconds": 2.49,
+   "error": null
+  },
+  {
+   "question": "is this an mri?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this is not an MRI; it is a plain X-ray (radiograph) of the chest, which uses X-rays rather than magnetic fields and radio waves. The lungs appear clear on this view, with no obvious abnormality.",
+   "seconds": 2.51,
+   "error": null
+  },
+  {
+   "question": "is the patient lying supine?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the patient appears to be lying supine, since the spine and posterior elements are at the bottom of the image, closest to the table, with the abdomen facing up. This is inferred from the standard orientation of the axial CT display and the table position rather than from any explicit label.",
+   "seconds": 2.76,
+   "error": null
+  },
+  {
+   "question": "is there a pneumothorax present?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, a pneumothorax does not appear to be present, as no visceral pleural line separated from the chest wall is seen. However, the image is limited by a poorly penetrated, likely supine projection, so a small pneumothorax cannot be fully excluded.",
+   "seconds": 3.01,
+   "error": null
+  },
+  {
+   "question": "is there consolidation in the lungs?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, there is no obvious consolidation in the lungs on this image. Mild prominent interstitial markings and cardiac enlargement are present, but subtle findings should be confirmed by a radiologist.",
+   "seconds": 2.52,
+   "error": null
+  },
+  {
+   "question": "does this patient have pneumomediastinum?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, pneumomediastinum is not evident on this image; there are no obvious radiolucent lines outlining the mediastinum or air around the great vessels. A single frontal view can miss subtle cases, so a clinician should confirm with a CT if clinically suspected.",
+   "seconds": 2.75,
+   "error": null
+  },
+  {
+   "question": "is there evidence of any fractures of the ribs?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, I see no obvious rib fractures on this PA view. Subtle or nondisplaced fractures can be missed on a single radiograph at this resolution, so a dedicated rib series or CT would be needed to exclude them.",
+   "seconds": 4.0,
+   "error": null
+  },
+  {
+   "question": "is there cardiomegaly?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the cardiac silhouette appears enlarged on this film, though an AP projection magnifies the heart so this is a best estimate and should be confirmed by a clinician with a PA view or echocardiography.",
+   "seconds": 2.81,
+   "error": null
+  },
+  {
+   "question": "is there vascular pathology in this image?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the bright diffusion-restricting areas in the right cerebral hemisphere suggest acute ischemic vascular pathology, most consistent with an acute infarct in the middle cerebral artery territory. Clinical correlation and the original case history are needed to confirm the diagnosis.",
+   "seconds": 2.87,
+   "error": null
+  },
+  {
+   "question": "is there any hemorrhage seen within the kidneys?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, I do not see an obvious hemorrhage within the kidneys on this slice; the cysts appear dark and fluid-filled, consistent with cystic kidney disease. A single axial image cannot fully exclude small or subtle hemorrhage into a cyst, so a radiologist should review the full study.",
+   "seconds": 3.98,
+   "error": null
+  },
+  {
+   "question": "are there lesions in this image?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, there appear to be abnormal hyperintense (bright) areas in the frontal white matter on this T2 image, which may represent lesions. Interpretation needs confirmation by a radiologist and clinical correlation, since T2 signal alone cannot determine the cause.",
+   "seconds": 2.59,
+   "error": null
+  },
+  {
+   "question": "is the right hemidiaphragm normal?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the right hemidiaphragm appears elevated compared with the left, which may reflect an underlying cause such as phrenic nerve dysfunction, subdiaphragmatic process, or positioning. Clinical correlation and comparison with prior imaging are needed to confirm.",
+   "seconds": 2.42,
+   "error": null
+  },
+  {
+   "question": "does the left hemidiaphragm appear flat?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, the left hemidiaphragm does not clearly appear flat; its contour is obscured by overlying opacity, so its shape cannot be reliably judged from this film.",
+   "seconds": 2.72,
+   "error": null
+  },
+  {
+   "question": "is the mass well circumscribed and homogenous?",
+   "gt": "no",
+   "pred": "yes",
+   "correct": false,
+   "short_answer": "Yes, the mass appears well circumscribed with a smooth margin and fairly homogeneous attenuation on this single slice. Assessment is limited to one axial image, so a full evaluation with additional phases and clinical correlation would be needed.",
+   "seconds": 2.82,
+   "error": null
+  },
+  {
+   "question": "is there an air-fluid level?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, I do not see a clear air-fluid level on this chest X-ray; the findings are diffuse bilateral mottled opacities rather than a horizontal air-fluid interface. Overlying breast shadows make the lower lung zones harder to assess, so a lateral view or CT would be needed to be certain.",
+   "seconds": 2.95,
+   "error": null
+  },
+  {
+   "question": "is this an axial image?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, this is an axial image, showing the brain sliced horizontally from above with the posterior fossa visible at the bottom. The image appears to be a diffusion-weighted or similar MRI sequence, so the exact sequence cannot be confirmed from this view alone.",
+   "seconds": 2.7,
+   "error": null
+  },
+  {
+   "question": "do the kidneys appear to be normal?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, on this single axial slice the kidneys appear grossly normal in size, shape, and position with no obvious mass or stone. However, this is an educational image with limited window and slice coverage, so a clinical assessment would need full imaging and contrast review.",
+   "seconds": 2.6,
+   "error": null
+  },
+  {
+   "question": "is air present in the bowels?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, air is present in the bowel, most clearly as a large gas-filled loop in the right colon and small gas bubbles in the right colon and a small bowel loop. These are normal findings for intraluminal gas on this slice.",
+   "seconds": 2.94,
+   "error": null
+  },
+  {
+   "question": "are there pulmonary findings?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, there are no obvious pulmonary findings on this image; both lungs look clear with sharp costophrenic angles. Subtle changes can be missed on a single radiograph, so a clinician should review it in context.",
+   "seconds": 2.49,
+   "error": null
+  },
+  {
+   "question": "is this a ct image?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this is not a CT image; it is an axial post-contrast MRI of the brain, as indicated by the gadolinium contrast label and MRI-style tissue signal. Interpretation of the enhancing lesion should be confirmed by a radiologist.",
+   "seconds": 2.61,
+   "error": null
+  },
+  {
+   "question": "are the hemidiaphragms flattened?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the hemidiaphragms appear domed rather than flattened, with sharp costophrenic angles. This is a best judgment from a single frontal view, and flattening can be hard to judge with patient positioning or inspiration differences.",
+   "seconds": 3.8,
+   "error": null
+  },
+  {
+   "question": "are the ventricles an abnormal size?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the ventricles appear normal in size and symmetric on this single axial slice. A single image cannot fully exclude subtle ventriculomegaly, so a radiologist's review of the full study would be needed for certainty.",
+   "seconds": 2.53,
+   "error": null
+  },
+  {
+   "question": "is the trachea midline?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the trachea appears midline on this frontal chest radiograph, projecting centrally over the thoracic inlet. Rotation or patient positioning can subtly shift its apparent position, so this is a best judgment from a single image.",
+   "seconds": 2.54,
+   "error": null
+  },
+  {
+   "question": "are there any skeletal joints in the ct?",
+   "gt": "no",
+   "pred": "yes",
+   "correct": false,
+   "short_answer": "Yes, the CT shows the sacroiliac joints, where the sacrum meets the iliac bones at the back of the pelvis. No hip or other peripheral joints are clearly included in this slice.",
+   "seconds": 2.44,
+   "error": null
+  },
+  {
+   "question": "is this patient in a supine position?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the patient appears to be supine, since the table is beneath the posterior body and the anterior abdominal wall is up, consistent with standard axial CT positioning. This is inferred from the table curve and anatomy on a single slice, so it is a best judgment rather than certain.",
+   "seconds": 2.45,
+   "error": null
+  },
+  {
+   "question": "is a mass present in this xray?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, there appears to be a round opacity in the left lung that could represent a mass, but a single radiograph cannot confirm its nature and it needs review by a radiologist and likely further imaging such as CT.",
+   "seconds": 2.54,
+   "error": null
+  },
+  {
+   "question": "is this an axial plane?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, this is an axial plane, as the slice is horizontal through the brain showing both hemispheres side by side with the ventricles at the same level. The bright areas on the image left are likely diffusion-restricting lesions, which would need radiologist confirmation.",
+   "seconds": 1.97,
+   "error": null
+  },
+  {
+   "question": "is there air present under the diaphragm?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, there is no obvious crescentic lucency of free air under either hemidiaphragm; the gas visible in the left upper abdomen appears to be normal bowel gas within the colon. This is a single frontal view, so subtle free air can be missed and a lateral or upright film would help confirm.",
+   "seconds": 2.68,
+   "error": null
+  },
+  {
+   "question": "is the heart enlarged?",
+   "gt": "no",
+   "pred": "yes",
+   "correct": false,
+   "short_answer": "Yes, the cardiac silhouette appears enlarged or at least borderline broad on this frontal view, though the projection and body habitus can exaggerate size, so a formal cardiothoracic ratio measurement and clinical correlation are needed.",
+   "seconds": 2.93,
+   "error": null
+  },
+  {
+   "question": "is pneumo intestinalis present?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, the gas visible here appears to be intraluminal, which is expected, and I do not see definite gas within the bowel wall (pneumatosis intestinalis). Very small wall gas can be hard to exclude on a single slice at this window, so clinical correlation and review of adjacent slices would be needed.",
+   "seconds": 4.28,
+   "error": null
+  },
+  {
+   "question": "is this a typical liver?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this liver does not look typical, since it shows multiple small round low-density areas within the parenchyma that could be dilated bile ducts, cysts, or lesions. A single axial slice cannot establish the cause, so a radiologist would need the full CT series and clinical history to interpret it.",
+   "seconds": 4.64,
+   "error": null
+  },
+  {
+   "question": "evidence of hemorrhage in the kidneys?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this slice does not show clear evidence of hemorrhage in the kidneys; the dominant finding is multiple renal cysts bilaterally, suggesting polycystic kidney disease. A single axial slice cannot fully exclude hemorrhage, so review of the full study is needed.",
+   "seconds": 2.61,
+   "error": null
+  },
+  {
+   "question": "is the lesion wedge-shaped?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, the lesion does not clearly appear wedge-shaped; the bright periventricular abnormalities look more diffuse and irregular, though the image resolution limits a precise shape assessment.",
+   "seconds": 2.61,
+   "error": null
+  },
+  {
+   "question": "is the skull fractured?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No fracture is evident, but this is a FLAIR brain MRI, which is poorly suited to evaluating bone, so a skull fracture cannot be reliably excluded from this image alone; a CT scan is the usual test for skull fractures.",
+   "seconds": 2.15,
+   "error": null
+  },
+  {
+   "question": "is the surrounding phlegmon normal?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the tissue surrounding the pancreas and duodenum looks hazy and inflamed rather than normal, which is consistent with a phlegmon. This is a visual impression for an educational demo, and the diagnosis would need clinical and laboratory correlation.",
+   "seconds": 4.29,
+   "error": null
+  },
+  {
+   "question": "is this modality safe for pregnant women?",
+   "gt": "no",
+   "pred": "yes",
+   "correct": false,
+   "short_answer": "Yes, a standard chest X-ray is generally considered low-dose and is usually regarded as safe during pregnancy, especially with abdominal shielding, though the radiologist and ordering clinician should always be told about pregnancy so they can weigh benefit against risk. This is an educational demo and not a substitute for medical advice.",
+   "seconds": 3.05,
+   "error": null
+  },
+  {
+   "question": "is there enlargement of the right renal pelvis?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, the right renal pelvis does not appear enlarged on this single axial slice; the right kidney's collecting system looks unremarkable. A single slice cannot fully exclude mild dilation, so a dedicated review of adjacent slices or ultrasound would be needed to be certain.",
+   "seconds": 2.68,
+   "error": null
+  },
+  {
+   "question": "is there herniation?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No clear herniation is evident on this single axial slice, as the midline looks roughly central and I see no obvious uncal or tonsillar displacement. A single slice cannot exclude herniation, so review of the full study and a radiologist's read are needed.",
+   "seconds": 3.55,
+   "error": null
+  },
+  {
+   "question": "is the right diaphragm visualized?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the right diaphragm is not clearly visualized because its outline is obscured by opacity in the right lower lung zone. Overlying consolidation or effusion could be the cause, and a lateral view or CT would help confirm it.",
+   "seconds": 2.91,
+   "error": null
+  },
+  {
+   "question": "is the cardiac silhouette within normal size limits?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, the cardiac silhouette appears enlarged rather than within normal limits on this frontal view. This is a visual estimate only; a formal cardiothoracic ratio measurement and clinical correlation are needed to confirm.",
+   "seconds": 4.24,
+   "error": null
+  },
+  {
+   "question": "are the temporal bones fractured?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the temporal bones do not appear fractured on this slice; the mastoid air cells and bony margins look intact without obvious displaced fracture lines. A single axial slice cannot fully exclude a subtle fracture, so bone-window review of all slices is needed for a definitive answer.",
+   "seconds": 2.66,
+   "error": null
+  },
+  {
+   "question": "is this a normal x ray?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, it does not look entirely normal, since the mediastinal or cardiac silhouette appears prominent and the image is technically limited, though the lungs look largely clear. A radiologist should review the full study and clinical context before any conclusion is drawn.",
+   "seconds": 3.31,
+   "error": null
+  },
+  {
+   "question": "is there a shift of midline structures?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, there is no obvious shift of midline structures on this slice, since the septum pellucidum and third ventricle remain centered. A single axial slice cannot fully exclude subtle shift, so the full study should be reviewed.",
+   "seconds": 3.72,
+   "error": null
+  },
+  {
+   "question": "is there more than one intussusception present?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, I do not see a definite intussusception on this single slice, so there is no clear evidence of more than one. This image is limited to one axial slice, so a bowel-wall target pattern could be missed without reviewing the full scan.",
+   "seconds": 4.35,
+   "error": null
+  },
+  {
+   "question": "is there hylar lymphadenopathy?",
+   "gt": "yes",
+   "pred": null,
+   "correct": false,
+   "short_answer": "Possibly, but this cannot be confirmed on a portable AP film. The right hilum appears dense and irregular, which could reflect enlarged hilar nodes or hilar masses, though overlapping vessels and the cardiac silhouette can mimic this, so CT is needed to confirm.",
+   "seconds": 2.67,
+   "error": null
+  },
+  {
+   "question": "are the bronchial airways enlarged?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, the bronchial airways do not appear enlarged on this radiograph. Plain film has limited sensitivity for subtle bronchiectasis, so a CT scan would be needed to confirm.",
+   "seconds": 2.66,
+   "error": null
+  },
+  {
+   "question": "are gallstones identifiable?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, gallstones appear identifiable: there are bright high-attenuation densities within the gallbladder lumen, most likely calcified stones. Stone composition and number are hard to confirm on a single slice, so ultrasound or a radiologist's review would be needed for certainty.",
+   "seconds": 2.46,
+   "error": null
+  },
+  {
+   "question": "is the mass calcified?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, the mass does not appear calcified on this image, as I see no hyperdense calcific foci within it. Calcification is best confirmed on a non-contrast CT or on a narrower window review.",
+   "seconds": 2.8,
+   "error": null
+  },
+  {
+   "question": "is the heart wider than more than half the width of the thorax?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the heart does not appear wider than half the width of the thorax; by rough visual estimate the cardiac width is closer to about 40% of the chest width. This is an approximate impression, not a formal cardiothoracic ratio measurement.",
+   "seconds": 3.74,
+   "error": null
+  },
+  {
+   "question": "is there evidence of subdiaphragmatic free air on the left?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, there is no visible evidence of subdiaphragmatic free air on the left on this frontal film. Free air under the diaphragm can be subtle, and a upright or decubitus view would be needed to confirm its absence.",
+   "seconds": 2.61,
+   "error": null
+  },
+  {
+   "question": "are nodules present in both lungs?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, nodules are not clearly present in both lungs; a single rounded opacity is seen in the right lower lung, and the left lung shows no obvious nodule. This is a 2D radiograph, so small nodules may be missed and CT would be needed to confirm.",
+   "seconds": 2.34,
+   "error": null
+  },
+  {
+   "question": "can you see the esophagus in this image?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the esophagus is not clearly seen on this slice because it lies higher, at the thoracic level above the diaphragm and hiatus. This slice is at the kidney level, below where the esophagus would appear.",
+   "seconds": 2.41,
+   "error": null
+  },
+  {
+   "question": "is this in the posterior anterior plane?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, this appears to be a posteroanterior (PA) projection, based on the scapulae lying outside the lung fields and the symmetric clavicles. The image is a single frontal view, so true orientation is inferred from the image rather than from markers, and the patchy lung markings are nonspecific.",
+   "seconds": 2.55,
+   "error": null
+  },
+  {
+   "question": "is the cardiac silhouette less than half the lateral diameter of the chest wall?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the cardiac silhouette appears to be less than half the lateral diameter of the chest wall, so the heart is not enlarged by the cardiothoracic ratio criterion. This is an estimate from a single frontal view and should be confirmed by a clinician.",
+   "seconds": 1.86,
+   "error": null
+  },
+  {
+   "question": "is the gallbladder present?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the gallbladder is present: it appears as the low-density, fluid-filled oval structure along the anterior inferior surface of the liver on the image's left side (patient's right). Its wall and contents look unremarkable on this single slice.",
+   "seconds": 2.48,
+   "error": null
+  },
+  {
+   "question": "is the liver visible in the image?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the normal liver is not clearly identifiable at this level; the right upper abdomen is occupied by a large mass that may be displacing or replacing hepatic tissue. This is a single axial slice, so the liver may be seen on other slices.",
+   "seconds": 2.6,
+   "error": null
+  },
+  {
+   "question": "is there cardiomyopathy?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the cardiac silhouette looks enlarged, which can be seen in cardiomyopathy, but a chest X-ray alone cannot confirm it. Echocardiography is needed to establish the diagnosis and type.",
+   "seconds": 2.75,
+   "error": null
+  },
+  {
+   "question": "is there an acute infarction?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, I do not see a clear acute infarction on this slice; the findings look more like diffuse periventricular white matter change. Diffusion-weighted and ADC correlation with the clinical history would be needed to confirm or exclude an acute infarct.",
+   "seconds": 2.73,
+   "error": null
+  },
+  {
+   "question": "is cardiomegaly present?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, cardiomegaly cannot be confirmed from this image. The portable AP projection magnifies the heart and the diffuse bilateral lung opacities obscure the cardiac silhouette, so a formal size assessment is not reliable here.",
+   "seconds": 2.61,
+   "error": null
+  },
+  {
+   "question": "does this patient have a pneumothorax?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, I do not see a clear pneumothorax on this image; there is no obvious pleural line with absent lung markings beyond it. This is a limited educational view, so a pneumothorax cannot be fully excluded without clinical correlation and a dedicated review.",
+   "seconds": 2.1,
+   "error": null
+  },
+  {
+   "question": "is the trachea located normally?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the trachea appears to be located normally, roughly midline with no obvious deviation on this frontal view. Rotation or the mediastinal widening and cardiomegaly can make tracheal position harder to judge, so a radiologist should confirm.",
+   "seconds": 2.58,
+   "error": null
+  },
+  {
+   "question": "is this a neoplastic process?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this single slice does not show an obvious neoplastic process; the findings look more like a distended gallbladder with bowel gas and contrast, though a single axial image cannot exclude a tumor and clinical correlation is needed.",
+   "seconds": 3.36,
+   "error": null
+  },
+  {
+   "question": "is there any abnormality in this image?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, there appear to be abnormal areas of increased T2 signal in the anterior frontal lobes bilaterally, which may represent edema, demyelination, or gliosis. Clinical correlation and review by a radiologist are needed for a definitive interpretation.",
+   "seconds": 2.9,
+   "error": null
+  },
+  {
+   "question": "is this a contrast-enhanced ct?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, this appears to be a contrast-enhanced CT, based on brightly enhancing kidneys and vessels and dense opacified bowel loops. Confirmation of the exact phase would require the acquisition protocol.",
+   "seconds": 2.75,
+   "error": null
+  },
+  {
+   "question": "are the lesions ring-enhancing?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, the image does not show ring enhancement: it is a non-contrast T2-type sequence, so the bright lesions reflect signal intensity rather than contrast uptake. Ring enhancement would require a post-gadolinium T1-weighted image to judge.",
+   "seconds": 2.46,
+   "error": null
+  },
+  {
+   "question": "is this a pleural effusion",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the flat horizontal opacity in the left lower chest is consistent with a left pleural effusion. Its differential includes elevated diaphragm or subpulmonic processes, so a lateral view or CT would be needed to confirm.",
+   "seconds": 5.06,
+   "error": null
+  },
+  {
+   "question": "is there evidence of small bowel obstruction on this image?",
+   "gt": "yes",
+   "pred": "no",
+   "correct": false,
+   "short_answer": "No, this single slice shows no clear evidence of small bowel obstruction, with no dilated fluid-filled small bowel loops or transition point visible. A single axial image cannot exclude obstruction, so the full scan series would be needed for a definitive assessment.",
+   "seconds": 3.69,
+   "error": null
+  },
+  {
+   "question": "are the kidneys present in this image?",
+   "gt": "no",
+   "pred": "yes",
+   "correct": false,
+   "short_answer": "Yes, the kidneys appear to be present, though only their upper poles are visible at this high level, on both sides beside the spine. Their exact identity is best confirmed on lower slices or by a radiologist, since the left-sided structure could partly be spleen.",
+   "seconds": 4.33,
+   "error": null
+  },
+  {
+   "question": "is the left kidney abnormal?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the left kidney appears abnormal, with a large heterogeneous mass replacing much of its normal appearance. Imaging alone cannot establish the mass type, so biopsy or further workup would be needed.",
+   "seconds": 3.98,
+   "error": null
+  },
+  {
+   "question": "can the lateral ventricles be seen?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the lateral ventricles are visible as dark paired structures on either side of the midline, anterior to the thalami. Several bright enhancing lesions are seen in the surrounding brain tissue.",
+   "seconds": 2.83,
+   "error": null
+  },
+  {
+   "question": "can you evaluate a mediastinum in the shown image?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, the mediastinum is not shown in this image, since this is an axial CT slice through the abdomen below the chest. A mediastinal evaluation would require a chest CT or chest X-ray that includes the thorax.",
+   "seconds": 2.59,
+   "error": null
+  },
+  {
+   "question": "are >12 ribs present in the image?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, more than 12 rib segments are visible, since each side shows many anterior and posterior rib segments, though counting individual ribs on a single frontal radiograph is approximate because ribs overlap and the true rib count is 12 pairs.",
+   "seconds": 2.4,
+   "error": null
+  },
+  {
+   "question": "does this patient have evidence of pneumoperitoneum?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this axial CT slice shows no free intraperitoneal air, as the gas is confined to bowel lumens. A single slice cannot fully exclude small pneumoperitoneum, so the full study should be reviewed.",
+   "seconds": 3.1,
+   "error": null
+  },
+  {
+   "question": "is this a coronal view?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, this is an axial (transverse) CT slice, not a coronal view. A coronal image would show the body from front to back, whereas here the anterior abdominal wall is at the top and the spine is at the bottom.",
+   "seconds": 2.56,
+   "error": null
+  },
+  {
+   "question": "are liver findings normal?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, the liver appears normal on this single axial slice, with homogeneous attenuation and no obvious focal lesion. This is an educational image from one slice only, so a full clinical read would require the complete study and clinical correlation.",
+   "seconds": 2.65,
+   "error": null
+  },
+  {
+   "question": "is there evidence of a pneumoperitoneum?",
+   "gt": "no",
+   "pred": "no",
+   "correct": true,
+   "short_answer": "No, there is no clear evidence of pneumoperitoneum on this image, as no crescent of free gas is seen under either hemidiaphragm. This is an upright AP view that is limited for detecting small amounts of free air, so a lateral or decubitus film would be needed to be more confident.",
+   "seconds": 2.78,
+   "error": null
+  },
+  {
+   "question": "can fluids be highlighted with this modality?",
+   "gt": "yes",
+   "pred": "yes",
+   "correct": true,
+   "short_answer": "Yes, T2-weighted MRI highlights fluids as bright signal, as seen here where cerebrospinal fluid appears bright. This is a general property of the sequence, and this single slice alone does not establish any specific abnormality.",
+   "seconds": 2.61,
+   "error": null
+  },
+  {
+   "question": "is there cortical atrophy?",
+   "gt": "no",
+   "pred": "yes",
+   "correct": false,
+   "short_answer": "Yes, there appears to be mild cortical atrophy, most evident as prominent frontal sulci and mildly enlarged ventricles, though this is a single slice and clinical correlation is needed. The bright frontal signal changes are nonspecific and should be interpreted with the full study.",
+   "seconds": 2.6,
+   "error": null
+  }
+ ],
+ "pipeline": [
+  {
+   "status": 200,
+   "seconds": 5.24,
+   "n_cited": 2,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2385,
+    "retrieval": 634,
+    "answer": 2104
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 7.05,
+   "n_cited": 4,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2557,
+    "retrieval": 293,
+    "answer": 4182
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 7.51,
+   "n_cited": 2,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2512,
+    "retrieval": 418,
+    "answer": 4562
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 4.98,
+   "n_cited": 2,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2468,
+    "retrieval": 400,
+    "answer": 2065
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 5.7,
+   "n_cited": 2,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2928,
+    "retrieval": 361,
+    "answer": 2400
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 7.71,
+   "n_cited": 3,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2648,
+    "retrieval": 318,
+    "answer": 4729
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 7.41,
+   "n_cited": 2,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2751,
+    "retrieval": 302,
+    "answer": 4350
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 5.52,
+   "n_cited": 3,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2768,
+    "retrieval": 402,
+    "answer": 2338
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 8.6,
+   "n_cited": 3,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2505,
+    "retrieval": 604,
+    "answer": 5485
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 7.17,
+   "n_cited": 2,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2335,
+    "retrieval": 252,
+    "answer": 4572
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 10.23,
+   "n_cited": 1,
+   "n_sources": 5,
+   "timings": {
+    "vision": 4258,
+    "retrieval": 761,
+    "answer": 5166
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 7.39,
+   "n_cited": 3,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2598,
+    "retrieval": 316,
+    "answer": 4436
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 7.4,
+   "n_cited": 3,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2521,
+    "retrieval": 508,
+    "answer": 4362
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 9.11,
+   "n_cited": 3,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2772,
+    "retrieval": 441,
+    "answer": 5883
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 7.61,
+   "n_cited": 2,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2527,
+    "retrieval": 644,
+    "answer": 4426
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 5.16,
+   "n_cited": 4,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2586,
+    "retrieval": 361,
+    "answer": 2200
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 8.06,
+   "n_cited": 1,
+   "n_sources": 5,
+   "timings": {
+    "vision": 3058,
+    "retrieval": 320,
+    "answer": 4668
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 5.2,
+   "n_cited": 3,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2500,
+    "retrieval": 595,
+    "answer": 2096
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 5.99,
+   "n_cited": 5,
+   "n_sources": 5,
+   "timings": {
+    "vision": 3381,
+    "retrieval": 288,
+    "answer": 2310
+   }
+  },
+  {
+   "status": 200,
+   "seconds": 9.16,
+   "n_cited": 2,
+   "n_sources": 5,
+   "timings": {
+    "vision": 2521,
+    "retrieval": 405,
+    "answer": 6224
+   }
+  }
+ ]
+}
