@@ -22,7 +22,7 @@ services:
     build: ./backend
     env_file: .env
     volumes:
-      - ./index:/index:ro       # unpacked index_medquad (index_info.json + chroma.sqlite3 + ...)
+      - ./index:/index          # unpacked index_medquad; ChromaDB needs write access even to read (on Linux: chown -R 1000:1000 index)
     expose:
       - "8000"
     restart: unless-stopped

@@ -6,7 +6,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # bake the query-embedding model into the image so the first request doesn't download it
 RUN python -c "from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-en-v1.5', cache_dir='/models')"
 COPY app ./app
-RUN useradd -m appuser && chown -R appuser /models
+RUN useradd -m -u 1000 appuser && chown -R appuser /models
 USER appuser
 EXPOSE 8000
 # one worker: the rate limiter is in memory

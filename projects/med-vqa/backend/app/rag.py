@@ -12,7 +12,13 @@ class Retriever:
     def __init__(self, index_dir=config.INDEX_DIR):
         self.info = json.load(open(os.path.join(index_dir, "index_info.json"), encoding="utf-8"))
         self.embedder = TextEmbedding(self.info["embed_model"], cache_dir=config.FASTEMBED_CACHE, threads=2)
-        self.collection = chromadb.PersistentClient(path=index_dir).get_collection(self.info["collection"])
+        try:
+            self.collection = chromadb.PersistentClient(path=index_dir).get_collection(self.info["collection"])
+        except Exception as e:
+            if "readonly" in str(e).lower() or "read-only" in str(e).lower():
+                raise RuntimeError(f"The index folder {index_dir} must be writable by the app (ChromaDB writes lock files "
+                                   f"even when reading). On a Linux server run: sudo chown -R 1000:1000 index") from e
+            raise
 
     def count(self):
         return self.collection.count()
