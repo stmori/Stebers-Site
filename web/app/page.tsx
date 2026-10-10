@@ -12,15 +12,26 @@ export default function HomePage() {
       </header>
 
       {/* Main */}
-      <main className="px-8">
+      <main className="px-8 pb-[30vw]">
         <h1 className="text-6xl font-bold">MED VQA</h1>
-        <p className="mt-4 max-w-2xl pl-6 text-base">
-          Users can upload medical imagery (such as X-rays, MRIs, or histology slides), and the system uses a Vision-Language Model
-          (VLM) combined with a Vector Database to identify physical anomalies, retrieve relevant medical literature, and generate a
-          cited diagnostic summary. To demonstrate cloud infrastructure and MLOps competency, the entire application will be decoupled
-          into microservices and containerized using Docker.
-        </p>
-        <p className="mt-6 pl-6">Contributors:</p>
+
+        {/* Description, with the screenshot behind its lower-right part */}
+        <div className="relative mt-4">
+          <p className="relative z-10 w-[65%] pl-6 text-base leading-relaxed">
+            Users can upload medical imagery (such as X-rays, MRIs, or histology slides), and the system uses a Vision-Language Model
+            (VLM) combined with a Vector Database to identify physical anomalies, retrieve relevant medical literature, and generate a
+            cited diagnostic summary. To demonstrate cloud infrastructure and MLOps competency, the entire application will be
+            decoupled into microservices and containerized using Docker.
+          </p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/med-vqa-screenshot.png"
+            alt="Med-VQA chat interface"
+            className="pointer-events-none absolute right-0 top-[55%] z-0 w-[48%] select-none rounded-xl opacity-40 shadow-2xl shadow-black/25 ring-1 ring-black/10 [mask-image:linear-gradient(to_right,transparent,black_30%)]"
+          />
+        </div>
+
+        <p className="relative z-10 mt-6 pl-6">Contributors:</p>
       </main>
     </div>
   );
