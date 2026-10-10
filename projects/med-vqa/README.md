@@ -42,6 +42,7 @@ Errors: `400` bad image or question, `422` the model declined to answer, `429` r
 ```bash
 cp .env.example .env                      # add ANTHROPIC_API_KEY, or set MOCK_LLM=1 to run without a key
 mkdir -p index && tar xzf index_medquad.tar.gz && mv index_medquad/* index/ && rmdir index_medquad
+sudo chown -R 1000:1000 index           # Linux only (the app runs as user 1000 and must be able to write here)
 docker compose up --build                 # http://localhost
 ```
 
@@ -54,7 +55,7 @@ The backup UI (plain HTML in `fallback-ui/`) runs with `WEB_DOCKERFILE=deploy/we
 3. On the VPS:
    ```bash
    git clone <repo> /opt/medvqa && cd /opt/medvqa && bash deploy/setup_vps.sh
-   # copy index_medquad.tar.gz here (scp), unpack into ./index as above
+   # copy index_medquad.tar.gz here (scp), unpack into ./index as above, then: chown -R 1000:1000 index
    cp .env.example .env && nano .env        # ANTHROPIC_API_KEY, DOMAIN="yourdomain.tech, www.yourdomain.tech"
    docker compose up -d --build
    ```
