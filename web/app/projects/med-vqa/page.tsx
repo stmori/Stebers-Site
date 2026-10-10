@@ -25,6 +25,9 @@ export default function MedVqaPage() {
   const [carried, setCarried] = useState<Img | null>(null); // last image sent; follow-ups reuse it
   const [hint, setHint] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [nuclei, setNuclei] = useState(false); // optional nuclei analysis (H&E histology only)
+  const nucleiRef = useRef(nuclei);
+  nucleiRef.current = nuclei;
 
   const urls = useRef<string[]>([]); // object URLs stay alive while the chat shows them
   const abort = useRef<AbortController | null>(null);
@@ -82,7 +85,7 @@ export default function MedVqaPage() {
 
     abort.current = new AbortController();
     try {
-      const data = await ask(img.file, q, abort.current.signal, history);
+      const data = await ask(img.file, q, abort.current.signal, history, { nuclei: nucleiRef.current });
       setMessages((prev) => prev.map<ChatMessage>((m) => (m.id === pendingId ? { id: pendingId, role: "assistant", status: "done", data } : m)));
     } catch (e) {
       if ((e as Error).name === "AbortError") return;
@@ -122,6 +125,10 @@ export default function MedVqaPage() {
         const blob = await (await fetch(`${EXAMPLES_DIR}/${ex.file}`)).blob();
         const img = toImg(new File([blob], ex.file.split("/").pop() || "example.jpg", { type: blob.type || "image/jpeg" }));
         setHint(null);
+        if (ex.nuclei) {
+          nucleiRef.current = true; // run() reads the ref, so set it before the state update lands
+          setNuclei(true);
+        }
         run(img, ex.question, true, false);
         setCarried(img);
         setAttachment(null);
@@ -176,6 +183,7 @@ export default function MedVqaPage() {
                     key={ex.file}
                     type="button"
                     onClick={() => tryExample(ex)}
+                    title={`${ex.label} · ${ex.source}`}
                     className="grid gap-2 rounded-xl border border-rule bg-surface p-2 text-xs hover:border-accent"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -204,6 +212,8 @@ export default function MedVqaPage() {
             onFiles={addFiles}
             onRemove={() => setAttachment(null)}
             hint={hint}
+            nuclei={nuclei}
+            onNucleiChange={setNuclei}
           />
           <p className="mt-2 text-center text-[11px] text-muted">
             Not medical advice or a diagnosis. Don&apos;t upload images with names or ID numbers. Images are sent to the AI model provider

@@ -1,4 +1,52 @@
-import type { AskResponse, Citation } from "../lib/types";
+import type { AskResponse, Citation, NucleiAnalysis, SimilarCase } from "../lib/types";
+
+/**
+ * Result of the optional nuclei tool: overlay + stats. When the tool didn't run (not histology, no nuclei, model
+ * missing) there's nothing to show here: the API already ends the answer with a "Nuclei analysis: ..." line.
+ */
+function NucleiPanel({ n }: { n: NucleiAnalysis }) {
+  if (n.status !== "ok") return null;
+  const stats: [string, string][] = [
+    ["Nuclei", n.count != null ? `about ${n.count}` : "–"],
+    ["Cellularity", `${n.density ?? "–"} (${n.coverage_pct ?? "–"}% of area)`],
+  ];
+  return (
+    <section aria-label="Nuclei analysis" className="grid gap-2 rounded-lg border border-rule bg-surface p-3 text-sm">
+      <h3 className="font-semibold">Nuclei analysis</h3>
+      {n.overlay && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={n.overlay} alt={`Detected nuclei outlined in color (${n.count} found)`} className="max-h-80 w-full rounded-md object-contain" />
+      )}
+      <dl className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-1">
+        {stats.map(([k, v]) => (
+          <div key={k} className="contents">
+            <dt className="text-muted">{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="text-xs text-muted">{n.tool}. Counts are approximate; it doesn't judge nuclear shape or atypia.</p>
+    </section>
+  );
+}
+
+/** Real past chest X-ray reports similar to this image's findings (Open-I, Indiana University). */
+function SimilarCases({ cases }: { cases: SimilarCase[] }) {
+  return (
+    <details className="rounded-lg border border-rule bg-surface px-3 py-2 text-sm">
+      <summary className="cursor-pointer select-none font-medium text-ink">Similar past cases ({cases.length})</summary>
+      <ul className="mt-2 grid gap-2">
+        {cases.map((c) => (
+          <li key={c.uid} className="grid gap-0.5">
+            <span className="font-medium">{c.impression || "No impression recorded"}</span>
+            {c.problems && <span className="text-xs text-muted">{c.problems.replace(/;/g, " · ")}</span>}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-2 text-xs text-muted">Indiana University chest X-ray reports via Open-I (NLM). Shown for comparison only.</p>
+    </details>
+  );
+}
 
 /** Turns "text [1] more [2]" into text with links to each source. No HTML injection: everything is a React node. */
 function withCitations(paragraph: string, byN: Map<number, Citation>, keyPrefix: string) {
@@ -37,6 +85,8 @@ export default function AnswerCard({ data }: { data: AskResponse }) {
         ))}
       </div>
 
+      {data.analysis?.nuclei && <NucleiPanel n={data.analysis.nuclei} />}
+
       {f?.is_medical_image && (
         <details className="group rounded-lg border border-rule bg-surface px-3 py-2 text-sm">
           <summary className="cursor-pointer select-none font-medium text-ink">What the model saw</summary>
@@ -60,6 +110,8 @@ export default function AnswerCard({ data }: { data: AskResponse }) {
           </dl>
         </details>
       )}
+
+      {data.similar_cases && data.similar_cases.length > 0 && <SimilarCases cases={data.similar_cases} />}
 
       {data.citations.length > 0 && (
         <section aria-label="Sources" className="grid gap-2">
@@ -88,7 +140,10 @@ export default function AnswerCard({ data }: { data: AskResponse }) {
 
       <p className="text-xs text-muted">
         {data.model}
-        {t && ` · image ${(t.vision / 1000).toFixed(1)} s · search ${(t.retrieval / 1000).toFixed(2)} s · answer ${(t.answer / 1000).toFixed(1)} s`}
+        {t && ` · image ${(t.vision / 1000).toFixed(1)} s`}
+        {t?.nuclei ? ` · nuclei ${(t.nuclei / 1000).toFixed(1)} s` : ""}
+        {t && ` · search ${(t.retrieval / 1000).toFixed(2)} s · answer ${(t.answer / 1000).toFixed(1)} s`}
+        {data.cached && " · instant (repeat question)"}
         {data.disclaimer && <> · {data.disclaimer}</>}
       </p>
     </div>
