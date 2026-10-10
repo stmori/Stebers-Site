@@ -1,0 +1,27 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+
+# large data (never in git)
+*.tar.gz
+*.zip
+index/
+**/logs/
+
+# editor / OS
+.DS_Store
+.vscode/
+.idea/
