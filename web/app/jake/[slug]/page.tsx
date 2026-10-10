@@ -29,7 +29,7 @@ export default async function ProjectPage({ params }: Props) {
   return (
     <>
       <TopBar back={{ href: "/jake/#projects", label: "All projects" }} />
-      <main className="mx-auto grid max-w-4xl gap-10 px-4 py-10 sm:px-6">
+      <main className="mx-auto grid max-w-4xl gap-10 px-4 py-10 sm:px-6 [&>*]:min-w-0">
         <header className="grid gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <StatusBadge status={p.status} />

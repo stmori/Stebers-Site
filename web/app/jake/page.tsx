@@ -18,7 +18,11 @@ function ProjectCard({ p }: { p: Project }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={p.cover} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
         ) : (
-          <div className="flex h-full items-center justify-center text-3xl font-semibold text-rule">{(p.short_title || p.title)[0]}</div>
+          // No image yet: show the headline number instead of an empty frame.
+          <div className="flex h-full flex-col items-center justify-center gap-1 bg-gradient-to-br from-accent-soft to-raised p-4 text-center">
+            <span className="text-4xl font-bold text-accent">{p.metrics?.[0]?.value || (p.short_title || p.title)[0]}</span>
+            {p.metrics?.[0] && <span className="text-sm text-muted">{p.metrics[0].label}</span>}
+          </div>
         )}
       </div>
       <div className="grid content-start gap-2 p-4">
@@ -28,7 +32,7 @@ function ProjectCard({ p }: { p: Project }) {
         </div>
         {p.period && <p className="text-xs text-muted">{p.period}</p>}
         {p.summary && <p className="line-clamp-3 text-sm text-muted">{p.summary}</p>}
-        {p.metrics?.[0] && (
+        {p.metrics?.[0] && p.cover && (
           <p className="text-sm">
             <span className="font-semibold text-accent">{p.metrics[0].value}</span> <span className="text-muted">{p.metrics[0].label}</span>
           </p>
@@ -56,7 +60,7 @@ export default function JakePage() {
   return (
     <>
       <TopBar />
-      <main className="mx-auto grid max-w-5xl gap-14 px-4 py-10 sm:px-6">
+      <main className="mx-auto grid max-w-5xl gap-14 px-4 py-10 sm:px-6 [&>*]:min-w-0">
         {/* Intro */}
         <section className="grid gap-6 sm:grid-cols-[auto_1fr] sm:items-start">
           {profile?.headshot ? (
@@ -121,7 +125,7 @@ export default function JakePage() {
           <Section title="Skills">
             <dl className="grid gap-4 sm:grid-cols-2">
               {Object.entries(profile.skills).map(([group, items]) => (
-                <div key={group} className="grid gap-2 rounded-xl border border-rule bg-surface p-4">
+                <div key={group} className="grid content-start gap-2 rounded-xl border border-rule bg-surface p-4">
                   <dt className="text-sm font-medium">{group}</dt>
                   <dd>
                     <Chips items={items} />
