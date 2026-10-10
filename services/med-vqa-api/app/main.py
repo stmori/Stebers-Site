@@ -21,7 +21,9 @@ from .tools.nuclei import NucleiTool, summary_for_prompt
 log = logging.getLogger("medvqa")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-app = FastAPI(title="Med-VQA API", docs_url="/api/docs", openapi_url="/api/openapi.json")
+# Interactive docs only when asked for (DOCS=1): Caddy forwards every /api/med-vqa/* path, so they'd be public otherwise.
+app = FastAPI(title="Med-VQA API", docs_url="/api/docs" if config.DOCS else None, redoc_url=None,
+              openapi_url="/api/openapi.json" if config.DOCS else None)
 if config.CORS_ORIGINS:
     app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_methods=["GET", "POST"],
                        allow_headers=["*"])

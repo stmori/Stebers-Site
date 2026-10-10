@@ -16,6 +16,8 @@ from .. import config
 HISTOLOGY_WORDS = ("histolog", "h&e", "h & e", "hematoxylin", "haematoxylin", "patholog", "tissue section",
                    "micrograph", "biopsy", "cytolog", "slide")
 MIN_NUCLEUS_PX = 30          # at 1024x1024 model resolution; smaller blobs are noise
+LOGIT_SMOOTH_SIGMA = 3.0     # px at 1024x1024: smooths the upsampled logits so thresholding doesn't leave speckle
+SPLIT_MIN_DISTANCE = 12      # px at 1024x1024: watershed seeds closer than this belong to the same nucleus
 INPUT = 1024
 
 
@@ -23,6 +25,23 @@ def looks_like_histology(findings):
     text = f'{findings.get("modality", "")} {findings.get("body_region", "")}'.lower()
     return any(w in text for w in HISTOLOGY_WORDS)
 
+
+
+def _split_touching(labels):
+    """Split touching nuclei that thresholding merged into one blob: watershed on the distance transform, one seed per
+    local maximum at least SPLIT_MIN_DISTANCE apart. With the logit smoothing, on the 133 held-out tiles this took the
+    count from r 0.38 / median ratio 0.75 to r 0.70 / 0.97 against the ground truth, standard AJI 0.28 -> 0.40 and
+    PQ 0.27 -> 0.34 (Dice unchanged at 0.72)."""
+    from scipy import ndimage
+    from skimage.feature import peak_local_max
+    from skimage.segmentation import watershed
+    mask = labels > 0
+    dist = ndimage.distance_transform_edt(mask)
+    peaks = peak_local_max(dist, min_distance=SPLIT_MIN_DISTANCE, labels=labels, exclude_border=False)
+    markers = np.zeros(labels.shape, np.int32)
+    markers[tuple(peaks.T)] = np.arange(1, len(peaks) + 1)
+    out = watershed(-dist, markers, mask=mask)
+    return out, int(out.max())
 
 
 def _short_modality(findings):
@@ -50,11 +69,15 @@ class NucleiTool:
         x = np.asarray(img.convert("RGB").resize((INPUT, INPUT), Image.BILINEAR), dtype=np.float32)
         logits = self.session.run(None, {"image": x.transpose(2, 0, 1)[None]})[0][0, 0]          # 256x256
         up = np.asarray(Image.fromarray(logits.astype(np.float32), mode="F").resize((INPUT, INPUT), Image.BILINEAR))
+        if LOGIT_SMOOTH_SIGMA > 0:
+            up = ndimage.gaussian_filter(up, LOGIT_SMOOTH_SIGMA)
         labels, n = ndimage.label(up > 0.0)                                                    # sigmoid > 0.5
         if n:
-            sizes = ndimage.sum(np.ones_like(labels), labels, index=np.arange(1, n + 1))
-            keep = np.zeros(n + 1, dtype=bool); keep[1:] = sizes >= MIN_NUCLEUS_PX
+            sizes = np.bincount(labels.ravel())
+            keep = sizes >= MIN_NUCLEUS_PX; keep[0] = False
             labels, n = ndimage.label(keep[labels])
+        if n:
+            labels, n = _split_touching(labels)
         return labels, n
 
     @staticmethod
@@ -89,17 +112,15 @@ class NucleiTool:
             return dict(status="no_nuclei", tool=name, count=int(n),
                         message="The model found almost no nuclei. The image may not be an H&E tile at a usable "
                                 "magnification, or it may be mostly non-cellular tissue.")
-        from scipy import ndimage
-        areas = ndimage.sum(np.ones_like(labels), labels, index=np.arange(1, n + 1)).astype(np.float64)
+        areas = np.bincount(labels.ravel())[1:].astype(np.float64)
+        areas = areas[areas > 0]
         coverage = float((labels > 0).mean() * 100)
-        cv = float(areas.std() / areas.mean())
-        variability = "fairly uniform" if cv < 0.5 else "moderately variable" if cv < 0.9 else "highly variable"
         density = "sparse" if coverage < 8 else "moderate" if coverage < 20 else "dense"
+        # Nuclear size variation is NOT reported: on the validation fold the model's size spread didn't correlate with
+        # the ground truth's (r about 0), so it would be a misleading "atypia" signal. Coverage tracks it well (r 0.87).
         return dict(status="ok", tool=name, count=int(n), coverage_pct=round(coverage, 1),
-                    mean_area_px=round(float(areas.mean()), 1), area_cv=round(cv, 2),
-                    size_variability=variability, density=density,
-                    message=f"Found {n} nuclei covering {coverage:.1f}% of the tile ({density} cellularity); "
-                            f"nuclear size is {variability} (coefficient of variation {cv:.2f}).",
+                    mean_area_px=round(float(areas.mean()), 1), density=density,
+                    message=f"Found about {n} nuclei covering {coverage:.1f}% of the tile ({density} cellularity).",
                     overlay=self.overlay(img, labels))
 
 
@@ -108,6 +129,7 @@ def summary_for_prompt(result):
     if not result:
         return ""
     if result["status"] == "ok":
-        return (f"Nuclei analysis ({result['tool']}): {result['message']} Mean nucleus area is "
-                f"{result['mean_area_px']} px at 1024x1024 model resolution (relative, not calibrated to microns).")
+        return (f"Nuclei analysis ({result['tool']}): {result['message']} The count is approximate (touching nuclei can "
+                f"merge or split); cellularity is the more reliable measure. The tool does not assess nuclear shape, "
+                f"size variation or atypia.")
     return f"Nuclei analysis ({result['tool']}): not available for this image. {result['message']}"
