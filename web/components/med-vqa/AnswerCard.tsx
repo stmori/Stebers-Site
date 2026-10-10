@@ -38,7 +38,7 @@ export default function AnswerCard({ data }: { data: AskResponse }) {
       </div>
 
       {f?.is_medical_image && (
-        <details className="group rounded-lg border border-rule bg-bg/60 px-3 py-2 text-sm">
+        <details className="group rounded-lg border border-rule bg-surface px-3 py-2 text-sm">
           <summary className="cursor-pointer select-none font-medium text-ink">What the model saw</summary>
           <dl className="mt-2 grid grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-[8rem_1fr]">
             <dt className="text-muted">Modality</dt>

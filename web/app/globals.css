@@ -14,6 +14,7 @@
   --color-warn-ink: #7a4b00;
   --color-err: #a3262e;
   --color-err-bg: #fbeaea;
+  --color-raised: #eef2f5;
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
@@ -31,6 +32,7 @@
     --color-warn-ink: #f0c37a;
     --color-err: #f08a8f;
     --color-err-bg: #3a1b1e;
+    --color-raised: #1d2a34;
     color-scheme: dark;
   }
 }
@@ -57,4 +59,25 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .dot { animation: none; opacity: 0.7; }
   * { scroll-behavior: auto !important; }
+}
+
+/* Always-dark scheme for full-screen apps (Med-VQA chat). Redefines the same tokens, so every
+   bg-* / text-* / border-* utility inside .theme-dark picks these up. */
+.theme-dark {
+  --color-bg: #0d1117;
+  --color-surface: #161b22;      /* inside the chat box: a step lighter than the page */
+  --color-raised: #1f2630;       /* user bubbles, attachment chips */
+  --color-ink: #e6edf3;
+  --color-muted: #8b98a5;
+  --color-rule: #30363d;         /* chat box outline */
+  --color-accent: #4fc3cf;
+  --color-accent-ink: #0d1117;
+  --color-accent-soft: #12333a;
+  --color-warn-bg: #2b2210;
+  --color-warn-ink: #e9c46a;
+  --color-err: #ff8a8f;
+  --color-err-bg: #3a1b1e;
+  color-scheme: dark;
+  background: var(--color-bg);
+  color: var(--color-ink);
 }

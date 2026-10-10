@@ -35,7 +35,8 @@ export interface Example {
 }
 
 export type ChatMessage =
-  | { id: string; role: "user"; question: string; imageUrl: string; imageName: string }
+  // imageUrl is null when the question reuses the image from an earlier message.
+  | { id: string; role: "user"; question: string; imageUrl: string | null; imageName: string }
   | { id: string; role: "assistant"; status: "loading"; startedAt: number }
   | { id: string; role: "assistant"; status: "done"; data: AskResponse }
   | { id: string; role: "assistant"; status: "error"; error: string };

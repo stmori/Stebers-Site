@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import SiteNav from "@/components/SiteNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,16 +15,13 @@ export const viewport: Viewport = {
   ],
 };
 
+// Root layout only sets up <html>/<body>. Pages pick a frame through route groups (folders in parentheses, not part of the URL):
+//   app/(site)/        normal pages with the nav bar and footer
+//   app/(fullscreen)/  full-height apps like the Med-VQA chat
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="flex min-h-dvh flex-col font-sans antialiased">
-        <SiteNav />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-12 pt-8 sm:px-6">{children}</main>
-        <footer className="border-t border-rule">
-          <div className="mx-auto max-w-6xl px-4 py-5 text-sm text-muted sm:px-6">© 2026 Jake &amp; Evanton</div>
-        </footer>
-      </body>
+      <body className="min-h-dvh font-sans antialiased">{children}</body>
     </html>
   );
 }
