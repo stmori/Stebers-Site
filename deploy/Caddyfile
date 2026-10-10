@@ -24,7 +24,14 @@
 	# The website (static Next.js export)
 	handle {
 		root * /srv
-		try_files {path} {path}/index.html {path}.html /404.html
+		try_files {path} {path}/index.html {path}.html
+		file_server
+	}
+
+	# Unknown pages: show the site's 404 page with a real 404 status (not a 200 "soft 404")
+	handle_errors 404 {
+		root * /srv
+		rewrite * /404.html
 		file_server
 	}
 }
