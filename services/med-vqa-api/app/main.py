@@ -75,6 +75,11 @@ def _cache_put(key, response):
         _cache.popitem(last=False)
 
 
+def _is_chest_xray(findings):
+    text = f'{findings["modality"]} {findings["body_region"]}'.lower()
+    return "chest" in text and any(w in text for w in ("x-ray", "xray", "radiograph", "cxr"))
+
+
 def _error(status, message):
     return JSONResponse(status_code=status, content={"error": message})
 
@@ -103,7 +108,8 @@ def _prepare_image(data: bytes):
 @app.get("/api/health")
 def health():
     return {"status": "ok", "provider": config.PROVIDER, "model": config.MODEL, "mock": config.MOCK_LLM,
-            "llm_configured": config.llm_configured(), "index_passages": retriever.count(), "cached_answers": len(_cache)}
+            "llm_configured": config.llm_configured(), "index_passages": retriever.count(), "index_cases": retriever.cases_count(),
+            "cached_answers": len(_cache)}
 
 
 @app.post("/api/ask")
@@ -135,7 +141,7 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
     t1 = time.time()
 
     if not findings["is_medical_image"]:
-        response = {"findings": findings, "citations": [], "disclaimer": config.DISCLAIMER, "model": config.MODEL,
+        response = {"findings": findings, "citations": [], "similar_cases": [], "disclaimer": config.DISCLAIMER, "model": config.MODEL,
                     "answer": "This doesn't look like a medical image, so there is nothing to look up. "
                               "Try an X-ray, CT, MRI or histology image.",
                     "timings_ms": {"vision": int((t1 - t0) * 1000), "retrieval": 0, "answer": 0}, "cached": False}
@@ -144,6 +150,9 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
 
     context = " ".join([question, findings["modality"], *findings["observations"]])
     hits = retriever.search_many([*findings["search_terms"], context])
+    similar = retriever.similar_cases(
+        f'Findings: {"; ".join(findings["observations"])} Impression: {findings["short_answer"]}'
+    ) if _is_chest_xray(findings) else []
     t2 = time.time()
 
     try:
@@ -160,7 +169,7 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
                       score=h["score"], cited=i in cited) for i, h in enumerate(hits, 1)]
     timings = {"vision": int((t1 - t0) * 1000), "retrieval": int((t2 - t1) * 1000), "answer": int((t3 - t2) * 1000)}
     log.info("ask ok %s", timings)  # never log the image or question text
-    response = {"findings": findings, "answer": text, "citations": citations, "disclaimer": config.DISCLAIMER,
-                "model": config.MODEL, "timings_ms": timings, "cached": False}
+    response = {"findings": findings, "answer": text, "citations": citations, "similar_cases": similar,
+                "disclaimer": config.DISCLAIMER, "model": config.MODEL, "timings_ms": timings, "cached": False}
     _cache_put(key, response)
     return response

@@ -26,6 +26,8 @@ INDEX_DIR = _env("INDEX_DIR", "/index")
 FASTEMBED_CACHE = _env("FASTEMBED_CACHE", "/models")
 TOP_K = int(_env("TOP_K", "5"))                     # passages given to the answer model
 MIN_SCORE = float(_env("MIN_SCORE", "0.6"))         # drop weaker matches (cosine similarity), but always keep 3
+CASES_K = int(_env("CASES_K", "3"))                 # similar past chest X-ray reports to return (0 = off)
+CASES_MIN_SCORE = float(_env("CASES_MIN_SCORE", "0.6"))
 
 MAX_IMAGE_MB = float(_env("MAX_IMAGE_MB", "8"))
 MAX_SIDE_PX = int(_env("MAX_SIDE_PX", "1024"))

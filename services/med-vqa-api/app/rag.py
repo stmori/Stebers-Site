@@ -20,8 +20,31 @@ class Retriever:
                                    f"even when reading). On a Linux server run: sudo chown -R 1000:1000 index") from e
             raise
 
+        self.cases = None
+        if self.info.get("cases_collection"):            # optional: similar past chest X-ray reports (Open-I)
+            try:
+                self.cases = chromadb.PersistentClient(path=index_dir).get_collection(self.info["cases_collection"])
+            except Exception:
+                self.cases = None
+
     def count(self):
         return self.collection.count()
+
+    def cases_count(self):
+        return self.cases.count() if self.cases else 0
+
+    def similar_cases(self, findings_text, k=config.CASES_K, min_score=config.CASES_MIN_SCORE):
+        """Most similar past chest X-ray reports (text only) to the model's findings."""
+        if not self.cases or k <= 0:
+            return []
+        vec = next(iter(self.embedder.embed([self.info["query_prefix"] + findings_text]))).tolist()
+        r = self.cases.query(query_embeddings=[vec], n_results=k * 2, include=["metadatas", "distances"])
+        out = []
+        for m, d in zip(r["metadatas"][0], r["distances"][0]):
+            if 1 - d >= min_score and len(out) < k:
+                out.append(dict(uid=m["uid"], problems=m.get("problems", ""), impression=m.get("impression", ""),
+                                findings=m.get("findings", "")[:400], score=round(1 - d, 3)))
+        return out
 
     def _ranked(self, queries, k):
         vecs = [v.tolist() for v in self.embedder.embed([self.info["query_prefix"] + q for q in queries])]
