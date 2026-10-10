@@ -4,18 +4,34 @@ Jake and Evanton's website: a shared landing page, a portfolio page for each of 
 
 ## Layout
 
+Folders are split by what gets deployed, not by URL. The website is one app; each project's backend is its own service next to it.
+
 ```
-/
-├── site/                 # the website (landing page, /jake, /evanton, project pages)   — Evanton
-└── projects/
-    └── med-vqa/          # Med-VQA: API, retrieval, deploy files, reference UI          — Jake
+web/                            # frontend (Next.js)                                — Evanton
+└── app/projects/med-vqa/         /projects/med-vqa/   (chat UI: page.tsx + its components/ and lib/)
+services/
+├── med-vqa-api/                # FastAPI + ChromaDB retrieval, index scripts         — Jake
+└── med-vqa-inference/          # vision model on the CRCV cluster (bare-metal)       — Jake
+deploy/
+├── docker-compose.yml          # web + every API on one network                      — shared
+├── Caddyfile                   # /  → website,  /api/med-vqa/*  → med-vqa-api
+└── .env.example
 ```
 
-- **Evanton** owns `site/` plus hosting and the domain.
-- **Jake** owns `projects/med-vqa/`.
-- Changes to the other person's folder go through them in the PR review.
+- **Evanton** owns `web/`, hosting and the domain.
+- **Jake** owns `services/med-vqa-*`.
+- `deploy/` is shared: change it in a PR and tag the other person.
 
-Med-VQA appears twice on the site: as a card on Jake's portfolio page and on its own page. That page calls the Med-VQA API at `/api/...`; the API contract is in `projects/med-vqa/README.md`.
+Med-VQA appears on Jake's portfolio card and on its own page, `/projects/med-vqa/`. That page calls the API at `/api/med-vqa/...`; the contract is in `services/med-vqa-api/README.md`. A new project gets a page in `web/app/projects/<name>/` and, if it has a backend, a folder in `services/` plus a route in `deploy/Caddyfile`.
+
+## Run everything
+
+```bash
+cp deploy/.env.example deploy/.env      # MOCK_LLM=1 runs without an API key; unpack the index first (services/med-vqa-api/README.md)
+cd deploy && docker compose up --build  # http://localhost
+```
+
+For UI work only: `cd web && npm install && npm run dev` (see `web/README.md`).
 
 ## Working together
 

@@ -133,7 +133,7 @@ async function ask() {
   const timer = setInterval(() => { i = Math.min(i + 1, steps.length - 1); $("status").textContent = steps[i]; }, 3500);
   try {
     const fd = new FormData(); fd.append("image", chosen); fd.append("question", q);
-    const r = await fetch("/api/ask", { method: "POST", body: fd });
+    const r = await fetch("/api/med-vqa/ask", { method: "POST", body: fd });
     const data = await r.json().catch(() => ({ error: "The server sent an unexpected response." }));
     if (!r.ok) throw new Error(data.error || `Request failed (${r.status}).`);
     const f = data.findings || {};

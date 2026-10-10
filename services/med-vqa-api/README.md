@@ -7,7 +7,7 @@ Upload a medical image (X-ray, CT, MRI, histology), ask a question, and get an a
 ## How it works
 
 ```
-browser ──HTTPS──▶ web (Caddy: TLS, static site, /api proxy) ──▶ api (FastAPI)
+browser ──HTTPS──▶ web (Caddy: TLS, static site, /api/med-vqa/* proxy) ──▶ med-vqa-api (FastAPI)
                                                                    ├─ 1. vision model: image + question → JSON findings
                                                                    ├─ 2. ChromaDB search over MedQuAD (16,346 NIH Q&A, fastembed bge-small)
                                                                    └─ 3. language model: findings + top-5 passages → answer with [n] citations
@@ -19,6 +19,8 @@ browser ──HTTPS──▶ web (Caddy: TLS, static site, /api proxy) ──▶
 - **Abuse limits:** per-IP rate limit (6/min, 60/day by default), 8 MB image cap, 500-character question cap.
 
 ## API
+
+The container serves `/api/...`. Through Caddy the public paths are `/api/med-vqa/...` (Caddy rewrites `/api/med-vqa/x` to `/api/x`), so the website calls `POST /api/med-vqa/ask`.
 
 `POST /api/ask` (multipart: `image`, `question`) →
 
@@ -35,18 +37,21 @@ browser ──HTTPS──▶ web (Caddy: TLS, static site, /api proxy) ──▶
 
 Errors: `400` bad image or question, `422` the model declined to answer, `429` rate limited, `502` model unavailable. All return `{"error": "<message for the user>"}`.
 
-`GET /api/health` → `{"status": "ok", "provider": "anthropic", "model": "claude-haiku-5-5", "mock": false, "llm_configured": true, "index_passages": 16346}`. Interactive docs at `/api/docs`.
+`GET /api/health` → `{"status": "ok", "provider": "anthropic", "model": "claude-haiku-5-5", "mock": false, "llm_configured": true, "index_passages": 16346}`. Interactive docs at `/api/docs` on the container (port 8000); not exposed through Caddy.
 
 ## Run locally
 
+From the repo root:
+
 ```bash
-cp .env.example .env                      # add ANTHROPIC_API_KEY, or set MOCK_LLM=1 to run without a key
-mkdir -p index && tar xzf index_medquad.tar.gz && mv index_medquad/* index/ && rmdir index_medquad
-sudo chown -R 1000:1000 index           # Linux only (the app runs as user 1000 and must be able to write here)
-docker compose up --build                 # http://localhost
+cp deploy/.env.example deploy/.env        # add ANTHROPIC_API_KEY, or set MOCK_LLM=1 to run without a key
+mkdir -p services/med-vqa-api/index && tar xzf index_medquad.tar.gz \
+  && mv index_medquad/* services/med-vqa-api/index/ && rmdir index_medquad
+sudo chown -R 1000:1000 services/med-vqa-api/index   # Linux only: the app runs as user 1000 and must be able to write here
+cd deploy && docker compose up --build    # http://localhost/projects/med-vqa/
 ```
 
-By default the `web` container serves the built-in Med-VQA page (`fallback-ui/`). The main website lives in `/site`; `deploy/frontend.Dockerfile` is a template for serving a static Next.js export instead (set `WEB_DOCKERFILE` in `.env`).
+The backup UI (plain HTML in `fallback-ui/`) runs with `WEB_DOCKERFILE=deploy/web-fallback.Dockerfile` in `deploy/.env`. The main UI is the `/projects/med-vqa` page of the website in `web/`.
 
 ## Deploy (Ubuntu VPS + your domain)
 
@@ -54,14 +59,14 @@ By default the `web` container serves the built-in Med-VQA page (`fallback-ui/`)
 2. At your registrar (Porkbun), delete the default parking records, then add `A @ → <IP>` and `A www → <IP>`.
 3. On the VPS:
    ```bash
-   git clone <repo> /opt/medvqa && cd /opt/medvqa && bash deploy/setup_vps.sh
-   # copy index_medquad.tar.gz here (scp), unpack into ./index as above, then: chown -R 1000:1000 index
-   cp .env.example .env && nano .env        # ANTHROPIC_API_KEY, DOMAIN="yourdomain.tech, www.yourdomain.tech"
-   docker compose up -d --build
+   git clone <repo> /opt/stebers-site && cd /opt/stebers-site && bash deploy/setup_vps.sh
+   # copy index_medquad.tar.gz here (scp), unpack into services/med-vqa-api/index as above, then: chown -R 1000:1000 services/med-vqa-api/index
+   cp deploy/.env.example deploy/.env && nano deploy/.env   # ANTHROPIC_API_KEY, DOMAIN="yourdomain.tech, www.yourdomain.tech"
+   cd deploy && docker compose up -d --build
    ```
 4. Once `dig +short yourdomain.tech` returns the IP, Caddy issues the HTTPS certificate on the first request.
 
-Updates: `git pull && docker compose up -d --build`. Logs: `docker compose logs -f api`.
+Updates: `git pull && cd deploy && docker compose up -d --build`. Logs: `docker compose logs -f med-vqa-api`.
 
 ## Rebuild the index
 

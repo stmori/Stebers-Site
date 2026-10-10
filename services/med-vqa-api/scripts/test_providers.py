@@ -2,7 +2,7 @@
 
 1. Claude provider with a fake Anthropic client: checks the exact request we send and how replies are handled.
 2. Real Anthropic API with a deliberately invalid key: checks the SDK reaches the API and auth errors map to 502.
-Run from projects/med-vqa/backend:  INDEX_DIR=... python ../scripts/test_providers.py
+Run from services/med-vqa-api:  INDEX_DIR=... python scripts/test_providers.py
 """
 import io
 import json
