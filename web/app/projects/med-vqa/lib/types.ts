@@ -6,6 +6,7 @@ export interface Findings {
   body_region: string;
   observations: string[];
   short_answer: string;
+  search_terms?: string[];
 }
 
 export interface Citation {
@@ -25,6 +26,23 @@ export interface AskResponse {
   disclaimer: string;
   model: string;
   timings_ms: { vision: number; retrieval: number; answer: number };
+  similar_cases?: SimilarCase[];
+  cached?: boolean;
+}
+
+/** A past chest X-ray report similar to this image's findings (Open-I, text only). */
+export interface SimilarCase {
+  uid: number;
+  problems: string;
+  impression: string;
+  findings: string;
+  score: number;
+}
+
+/** An earlier question and answer about the same image, sent with follow-ups. */
+export interface HistoryTurn {
+  question: string;
+  answer: string;
 }
 
 export interface Example {
