@@ -54,7 +54,7 @@ def look(image_data_uri, question, history=None):
                 search_terms=terms)
 
 
-def answer(question, findings, hits, history=None):
+def answer(question, findings, hits, history=None, tools_text=""):
     if config.MOCK_LLM:
         return ("Mock answer: the image appears to show an opacity in the right upper lung [1]. "
                 "Conditions like this are described in the reference passages [2]. "
@@ -63,5 +63,6 @@ def answer(question, findings, hits, history=None):
                                      modality=findings["modality"], body_region=findings["body_region"],
                                      observations="\n".join(f"- {o}" for o in findings["observations"]) or "- none reported",
                                      short_answer=findings["short_answer"],
-                                     sources=prompts.format_sources(hits))
+                                     sources=prompts.format_sources(hits),
+                                     tools=f"{tools_text}\n\n" if tools_text else "")
     return provider.answer(prompts.ANSWER_SYSTEM, msg)

@@ -16,6 +16,7 @@ from PIL import Image, UnidentifiedImageError
 
 from . import config, dicom, llm
 from .rag import Retriever
+from .tools.nuclei import NucleiTool, summary_for_prompt
 
 log = logging.getLogger("medvqa")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -26,8 +27,10 @@ if config.CORS_ORIGINS:
                        allow_headers=["*"])
 
 retriever = Retriever()
+nuclei_tool = NucleiTool()
 log.info("index loaded: %d passages, provider=%s, model=%s, mock=%s, key set=%s",
          retriever.count(), config.PROVIDER, config.MODEL, config.MOCK_LLM, config.llm_configured())
+log.info("nuclei tool: %s", "ready" if nuclei_tool.ready else f"not installed ({config.NUCLEI_MODEL})")
 
 # ---- per-IP rate limit (in memory; run a single uvicorn worker) ----
 _hits = defaultdict(deque)
@@ -90,6 +93,20 @@ def _cache_put(key, response):
         _cache.popitem(last=False)
 
 
+def _ensure_tool_mention(text, nuclei):
+    """The answer must say whether the requested nuclei tool ran. If the model left it out, append the tool's own sentence."""
+    if not nuclei:
+        return text
+    t = text.lower()
+    if nuclei["status"] == "ok":
+        if str(nuclei.get("count")) in text and "nucle" in t:
+            return text
+        return f'{text}\n\nA nuclei segmentation model {nuclei["message"][0].lower()}{nuclei["message"][1:]}'
+    if "nucle" in t and any(w in t for w in ("analysis", "segmentation", "tool")):
+        return text
+    return f'{text}\n\n{nuclei["message"]}'
+
+
 def _split_merged_citations(text, n_sources):
     """Fix citations the model glued together, e.g. "[12]" with 5 sources becomes "[1][2]"."""
     def fix(m):
@@ -127,24 +144,25 @@ def _prepare_image(data: bytes):
     img.thumbnail((config.MAX_SIDE_PX, config.MAX_SIDE_PX))
     buf = io.BytesIO()
     img.save(buf, format="JPEG", quality=90)
-    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode(), img
 
 
 @app.get("/api/health")
 def health():
     return {"status": "ok", "provider": config.PROVIDER, "model": config.MODEL, "mock": config.MOCK_LLM,
             "llm_configured": config.llm_configured(), "index_passages": retriever.count(), "index_cases": retriever.cases_count(),
-            "cached_answers": len(_cache)}
+            "nuclei_tool": nuclei_tool.ready, "cached_answers": len(_cache)}
 
 
 @app.post("/api/ask")
-def ask(request: Request, image: UploadFile = File(...), question: str = Form(...), history: str = Form("")):
+def ask(request: Request, image: UploadFile = File(...), question: str = Form(...), history: str = Form(""),
+        analyze_nuclei: bool = Form(False)):
     question = (question or "").strip()
     if not 3 <= len(question) <= config.MAX_QUESTION_CHARS:
         return _error(400, f"Ask a question between 3 and {config.MAX_QUESTION_CHARS} characters.")
     data = image.file.read()
     turns = _parse_history(history)
-    key = _cache_key(data, question, turns)
+    key = _cache_key(data, question + ("\0nuclei" if analyze_nuclei else ""), turns)
     cached = _cache_get(key)
     if cached:                                     # repeat question: instant, free, not rate-limited
         log.info("ask cache hit")
@@ -152,7 +170,7 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
     if _rate_limited(_client_ip(request)):
         return _error(429, "Too many requests. Try again in a minute.")
     try:
-        uri = _prepare_image(data)
+        uri, img = _prepare_image(data)
     except ValueError as e:
         return _error(400, str(e))
 
@@ -166,11 +184,17 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
         return _error(502, "The AI model is unavailable right now. Try again in a minute.")
     t1 = time.time()
 
+    nuclei = nuclei_tool.run(img, findings) if analyze_nuclei else None   # optional specialist tool (H&E only)
+    analysis = {"nuclei": nuclei} if nuclei else {}
+    t1b = time.time()
+
     if not findings["is_medical_image"]:
         response = {"findings": findings, "citations": [], "similar_cases": [], "disclaimer": config.DISCLAIMER, "model": config.MODEL,
                     "answer": "This doesn't look like a medical image, so there is nothing to look up. "
                               "Try an X-ray, CT, MRI or histology image.",
-                    "timings_ms": {"vision": int((t1 - t0) * 1000), "retrieval": 0, "answer": 0}, "cached": False}
+                    "analysis": analysis,
+                    "timings_ms": {"vision": int((t1 - t0) * 1000), "nuclei": int((t1b - t1) * 1000), "retrieval": 0, "answer": 0},
+                    "cached": False}
         _cache_put(key, response)
         return response
 
@@ -182,7 +206,7 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
     t2 = time.time()
 
     try:
-        text = llm.answer(question, findings, hits, turns)
+        text = llm.answer(question, findings, hits, turns, summary_for_prompt(nuclei))
     except llm.RefusalError:
         return _error(422, "The AI model declined to answer this request. Try a different image or question.")
     except llm.EngineError as e:
@@ -190,13 +214,15 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
         return _error(502, "The AI model is unavailable right now. Try again in a minute.")
     t3 = time.time()
 
-    text = _split_merged_citations(text, len(hits))
+    text = _ensure_tool_mention(_split_merged_citations(text, len(hits)), nuclei)
     cited = {int(n) for n in re.findall(r"\[(\d+)\]", text)}
     citations = [dict(n=i, title=h["title"], url=h["url"], source=h["source"], snippet=h["text"][:400],
                       score=h["score"], cited=i in cited) for i, h in enumerate(hits, 1)]
-    timings = {"vision": int((t1 - t0) * 1000), "retrieval": int((t2 - t1) * 1000), "answer": int((t3 - t2) * 1000)}
+    timings = {"vision": int((t1 - t0) * 1000), "nuclei": int((t1b - t1) * 1000), "retrieval": int((t2 - t1b) * 1000),
+               "answer": int((t3 - t2) * 1000)}
     log.info("ask ok %s", timings)  # never log the image or question text
     response = {"findings": findings, "answer": text, "citations": citations, "similar_cases": similar,
-                "disclaimer": config.DISCLAIMER, "model": config.MODEL, "timings_ms": timings, "cached": False}
+                "analysis": analysis, "disclaimer": config.DISCLAIMER, "model": config.MODEL, "timings_ms": timings,
+                "cached": False}
     _cache_put(key, response)
     return response

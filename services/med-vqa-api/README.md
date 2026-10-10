@@ -22,22 +22,48 @@ browser ──HTTPS──▶ web (Caddy: TLS, static site, /api/med-vqa/* proxy)
 
 The container serves `/api/...`. Through Caddy the public paths are `/api/med-vqa/...` (Caddy rewrites `/api/med-vqa/x` to `/api/x`), so the website calls `POST /api/med-vqa/ask`.
 
-`POST /api/ask` (multipart: `image`, `question`) →
+`POST /api/ask`, multipart form:
+
+| field | required | meaning |
+|---|---|---|
+| `image` | yes | PNG, JPEG, WebP or DICOM (`.dcm`), ≤ 8 MB. DICOM headers are discarded. |
+| `question` | yes | 3–500 characters |
+| `history` | no | JSON list of earlier `{"question", "answer"}` turns about the same image (last 3 used) |
+| `analyze_nuclei` | no | `true` runs the nuclei tool (H&E histology only; see below) |
+
+Response:
 
 ```json
 {
   "findings": {"is_medical_image": true, "modality": "Chest X-ray (PA)", "body_region": "Chest",
-               "observations": ["..."], "short_answer": "..."},
-  "answer": "... [1] ... [2]",
+               "observations": ["..."], "short_answer": "...", "search_terms": ["pneumonia", "pleural effusion"]},
+  "answer": "Yes ... most likely pneumonia [1] ...",
   "citations": [{"n": 1, "title": "...", "url": "https://...", "source": "...", "snippet": "...", "score": 0.79, "cited": true}],
-  "disclaimer": "...", "model": "claude-haiku-5-5",
-  "timings_ms": {"vision": 3100, "retrieval": 40, "answer": 2800}
+  "similar_cases": [{"uid": 1740, "problems": "...", "impression": "...", "findings": "...", "score": 0.88}],
+  "analysis": {"nuclei": {"status": "ok", "count": 57, "coverage_pct": 12.4, "density": "moderate",
+                          "size_variability": "moderately variable", "area_cv": 0.61, "message": "...",
+                          "overlay": "data:image/jpeg;base64,..."}},
+  "disclaimer": "...", "model": "claude-haiku-5-5", "cached": false,
+  "timings_ms": {"vision": 3100, "nuclei": 900, "retrieval": 40, "answer": 2800}
 }
 ```
 
+- `similar_cases` is filled only for chest X-rays.
+- `analysis` is `{}` unless `analyze_nuclei=true`. When the tool can't run, `analysis.nuclei.status` is `not_applicable` (not H&E histology), `no_nuclei`, or `unavailable` (model file not installed), and `message` explains why.
+- `cached: true` means an identical earlier request was answered instantly.
+
 Errors: `400` bad image or question, `422` the model declined to answer, `429` rate limited, `502` model unavailable. All return `{"error": "<message for the user>"}`.
 
-`GET /api/health` → `{"status": "ok", "provider": "anthropic", "model": "claude-haiku-5-5", "mock": false, "llm_configured": true, "index_passages": 16346}`. Interactive docs at `/api/docs` on the container (port 8000); not exposed through Caddy.
+`GET /api/health` → `{"status": "ok", "provider": "anthropic", "model": "claude-haiku-5-5", "mock": false, "llm_configured": true, "index_passages": 16346, "index_cases": 3818, "nuclei_tool": true, "cached_answers": 0}`. Interactive docs at `/api/docs` on the container (port 8000); not exposed through Caddy.
+
+## Nuclei analysis tool (optional)
+
+`app/tools/nuclei.py` runs Jake's **LoRA-fine-tuned MobileSAM** (rank-4 LoRA on the TinyViT encoder, trained on NuInsSeg, merged and exported to ONNX) on CPU with ONNX Runtime; no PyTorch in the container.
+
+- **When it runs:** only if the request sets `analyze_nuclei=true` **and** the vision model says the image is histology (H&E, pathology, tissue section, …). Otherwise it reports `not_applicable`, and the answer says so in one sentence and still answers the question.
+- **What it does:** resizes to 1024×1024 and makes one prompt-free forward pass (~1 s on CPU). Then sigmoid > 0.5 and connected components (blobs < 30 px dropped) give the nucleus count, area coverage (cellularity), and the coefficient of variation of nucleus size (a rough pleomorphism signal). It also builds a colored overlay image. The measurements are passed to the answer model.
+- **Model file:** `nuclei_lora.onnx` (~40 MB) lives **in the index folder** (`/index/nuclei_lora.onnx`, override with `NUCLEI_MODEL`), so it ships with the index tarball. If it's missing, the API still works and the tool reports `unavailable`.
+- **Training and export:** see the LoRA project (`jake_projects/lora-mobilesam-nuclei/`); the export script bakes the constant empty prompt into the ONNX graph.
 
 ## Run locally
 
@@ -76,3 +102,5 @@ Updates: `git pull && cd deploy && docker compose up -d --build`. Logs: `docker 
 
 - MedQuAD (Ben Abacha & Demner-Fushman, 2019), NIH sources; answers removed upstream for copyrighted subsets were dropped.
 - Example images: VQA-RAD (CC0) and Open-I / Indiana University chest X-rays.
+- Similar cases: Indiana University chest X-ray reports via Open-I (NLM), report text only.
+- Nuclei model: MobileSAM (Apache-2.0) fine-tuned with LoRA on NuInsSeg (Mahbod et al., CC BY 4.0).
