@@ -77,6 +77,10 @@ check("search terms returned in findings", body["findings"]["search_terms"] == [
 check("search terms drive retrieval (a pneumonia page is retrieved)",
       any("pneumonia" in c["title"].lower() for c in body["citations"]), [c["title"] for c in body["citations"]])
 check("schema requires search_terms", "search_terms" in claude.FINDINGS_SCHEMA["required"])
+check("chest X-ray -> similar cases returned", 0 < len(body["similar_cases"]) <= 3 and "impression" in body["similar_cases"][0],
+      body.get("similar_cases"))
+check("non-chest image -> no similar cases",
+      main._is_chest_xray(dict(FINDINGS, modality="Axial CT", body_region="Abdomen")) is False)
 v, a = fake.calls
 check("model + max_tokens sent", v["model"] == "claude-haiku-5-5" and v["max_tokens"] == 2048)
 check("no sampling params (Haiku 5.5 rejects them)", not ({"temperature", "top_p", "top_k"} & set(v) | {"temperature", "top_p", "top_k"} & set(a)))
