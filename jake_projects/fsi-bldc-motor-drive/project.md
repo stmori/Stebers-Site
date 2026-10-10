@@ -30,7 +30,7 @@ links:
 cover: media/team-demo-day.jpg
 gallery:
   - {src: media/team-demo-day.jpg, alt: "The six-person team with the blue 3D-printed rover and controller software at the UCF senior design showcase",
-     caption: "Senior design showcase: the RE-RASSOR rover with the new BLDC drive and the controller software"}
+     caption: "Senior design showcase: the RE-RASSOR rover with the new BLDC drive and the controller software", position: bottom}
 youtube:
   - {id: nepobVCOfdU, title: "Florida Space Institute – BLDC Motor Control System"}
 documents:
