@@ -1,0 +1,5 @@
+.env
+index/
+*.tar.gz
+__pycache__/
+scripts/logs/

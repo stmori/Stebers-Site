@@ -1,0 +1,36 @@
+# The whole stack. Run from this folder:  docker compose up --build
+#   web          = Caddy: HTTPS, the static website (web/), and /api/<project>/* routing
+#   med-vqa-api  = FastAPI + ChromaDB (services/med-vqa-api/)
+# Local test:  DOMAIN=":80" in .env  ->  http://localhost
+# Production:  DOMAIN="yourdomain.tech, www.yourdomain.tech"  ->  https://yourdomain.tech
+# New project API: add a service here and a route in Caddyfile.
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: ${WEB_DOCKERFILE:-web/Dockerfile}   # WEB_DOCKERFILE=deploy/web-fallback.Dockerfile for the Med-VQA backup UI
+    environment:
+      DOMAIN: ${DOMAIN:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data        # TLS certificates; keep this volume or Let's Encrypt has to reissue
+      - caddy_config:/config
+    depends_on:
+      - med-vqa-api
+    restart: unless-stopped
+
+  med-vqa-api:
+    build: ../services/med-vqa-api
+    env_file: .env
+    volumes:
+      - ../services/med-vqa-api/index:/index:ro   # unpacked index_medquad (index_info.json + chroma.sqlite3 + ...)
+    expose:
+      - "8000"
+    # ports: ["8000:8000"]     # uncomment to call the API directly from `next dev`
+    restart: unless-stopped
+
+volumes:
+  caddy_data: {}
+  caddy_config: {}

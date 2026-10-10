@@ -4,24 +4,36 @@ Jake and Evanton's website: a shared landing page, a portfolio page for each of 
 
 ## Layout
 
+Folders are split by what gets deployed, not by URL. The website is one app; each project's backend is its own service next to it.
+
 ```
-site/                           # the website root
-├── index.html                  # home page                                      /
-├── assets/site.css             # shared styles for the plain-HTML pages
-└── projects/
-    ├── index.html              # projects page                                  /projects/
-    └── med-vqa/                # Med-VQA page                                   /projects/med-vqa/
-        ├── frontend/           # Next.js app (upload, chat, citations)          — Evanton
-        ├── backend/            # FastAPI + ChromaDB retrieval                    — Jake
-        ├── deploy/ scripts/    # Caddy, VPS setup, index build, cluster tests    — Jake
-        └── docker-compose.yml
+web/                            # the whole website (Next.js)                       — Evanton
+├── app/page.tsx                  /
+├── app/projects/page.tsx         /projects/
+└── app/projects/med-vqa/         /projects/med-vqa/   (upload + chat UI)
+services/
+├── med-vqa-api/                # FastAPI + ChromaDB retrieval, index scripts         — Jake
+└── med-vqa-inference/          # vision model on the CRCV cluster (bare-metal)       — Jake
+deploy/
+├── docker-compose.yml          # web + every API on one network                      — shared
+├── Caddyfile                   # /  → website,  /api/med-vqa/*  → med-vqa-api
+└── .env.example
 ```
 
-- **Evanton** owns the site pages (`site/index.html`, `site/projects/index.html`, `site/assets/`), `site/projects/med-vqa/frontend/`, hosting and the domain.
-- **Jake** owns the rest of `site/projects/med-vqa/` (backend, deploy, scripts).
-- Changes to the other person's folder go through them in the PR review.
+- **Evanton** owns `web/`, hosting and the domain.
+- **Jake** owns `services/med-vqa-*`.
+- `deploy/` is shared: change it in a PR and tag the other person.
 
-Med-VQA appears twice on the site: as a card on Jake's portfolio page and on its own page. That page calls the Med-VQA API at `/api/...`; the API contract is in `site/projects/med-vqa/README.md`.
+Med-VQA appears on Jake's portfolio card and on its own page, `/projects/med-vqa/`. That page calls the API at `/api/med-vqa/...`; the contract is in `services/med-vqa-api/README.md`. A new project gets a page in `web/app/projects/<name>/` and, if it has a backend, a folder in `services/` plus a route in `deploy/Caddyfile`.
+
+## Run everything
+
+```bash
+cp deploy/.env.example deploy/.env      # MOCK_LLM=1 runs without an API key; unpack the index first (services/med-vqa-api/README.md)
+cd deploy && docker compose up --build  # http://localhost
+```
+
+For UI work only: `cd web && npm install && npm run dev` (see `web/README.md`).
 
 ## Working together
 

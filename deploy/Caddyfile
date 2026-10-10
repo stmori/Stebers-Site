@@ -1,0 +1,30 @@
+{$DOMAIN::80} {
+	encode gzip
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	# Med-VQA API: /api/med-vqa/ask -> med-vqa-api:8000/api/ask
+	handle /api/med-vqa/* {
+		request_body {
+			max_size 10MB
+		}
+		uri replace /api/med-vqa/ /api/ 1
+		reverse_proxy med-vqa-api:8000
+	}
+
+	# Add one block per project API, e.g.
+	# handle /api/other-project/* {
+	# 	uri replace /api/other-project/ /api/ 1
+	# 	reverse_proxy other-project-api:8000
+	# }
+
+	# The website (static Next.js export)
+	handle {
+		root * /srv
+		try_files {path} {path}/index.html {path}.html /404.html
+		file_server
+	}
+}
