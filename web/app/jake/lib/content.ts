@@ -9,7 +9,7 @@ const ROOT = process.env.JAKE_PROJECTS_DIR || path.resolve(process.cwd(), "..", 
 
 export type Link = { label: string; url: string };
 export type Metric = { value: string; label: string };
-export type GalleryItem = { src: string; alt: string; caption?: string };
+export type GalleryItem = { src: string; alt: string; caption?: string; position?: "top" | "bottom" };
 
 export interface Project {
   slug: string;
