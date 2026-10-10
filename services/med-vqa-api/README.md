@@ -64,6 +64,7 @@ Errors: `400` bad image or question, `422` the model declined to answer, `429` r
 - **What it does:** resizes to 1024×1024 and makes one prompt-free forward pass (~1 s on CPU). Then sigmoid > 0.5 and connected components (blobs < 30 px dropped) give the nucleus count, area coverage (cellularity), and the coefficient of variation of nucleus size (a rough pleomorphism signal). It also builds an overlay image with outlined nuclei. The measurements are passed to the answer model as evidence.
 - **How the answer reports it:** the server always appends one standard line to the answer (`Nuclei analysis (LoRA MobileSAM): Found 14 nuclei …` or `Nuclei analysis: … wasn't run on this chest X-ray.`), and drops any sentence where the model restated the tool output, so the result appears exactly once.
 - **Model file:** `nuclei_lora.onnx` (52 MB; the 30-epoch retrain, fold-1 Dice 0.72 / AJI 0.59) lives **in the index folder** (`/index/nuclei_lora.onnx`, override with `NUCLEI_MODEL`), so it ships with the index tarball. If it's missing, the API still works and the tool reports `unavailable`.
+- **Server size:** the API process uses ~0.45 GB RAM idle and peaks at ~1.15 GB while the nuclei tool runs (~2 s per image on 2 vCPUs). Use a server with **at least 2 GB RAM** (e.g. a 2 GB DigitalOcean droplet or a Hetzner CX22); on 1 GB the tool can get the container OOM-killed.
 - **Training and export:** see the LoRA project (`jake_projects/lora-mobilesam-nuclei/`); the export script bakes the constant empty prompt into the ONNX graph.
 
 ## Run locally
