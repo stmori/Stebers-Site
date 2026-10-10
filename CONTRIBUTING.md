@@ -21,6 +21,16 @@ git push -u origin jake/short-topic            # 4. push the branch
 - **Never commit secrets.** No API keys, tokens, passwords or `.env` files. Commit `.env.example` with blank values instead. If a secret is ever pushed, rotate it immediately; deleting the commit isn't enough.
 - **No big files.** Datasets, search indexes, model weights and build output stay out of git (see `.gitignore`).
 
+## Who merges what
+
+| PR changes files in... | Who merges |
+|---|---|
+| only `projects/med-vqa/` | Jake (or Jake's Claude Code session) may merge it once its tests pass. Evanton is still welcome to comment. |
+| `site/` | Jake reviews; Evanton merges. |
+| anything at the root (`README.md`, `CONTRIBUTING.md`, `.gitignore`, ...) or more than one area | The other person reviews and merges. |
+
+Jake works with Claude Code, which opens PRs from Jake's account (Jeber811). It follows the same rules: it never pushes to `main`, uses `jake/<topic>` branches, and only merges PRs that change `projects/med-vqa/` alone.
+
 ## If main moved while you were working
 
 ```bash
