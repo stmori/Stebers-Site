@@ -38,7 +38,10 @@ How to answer:
 - Never mention the vision model, "observations", "reference passages", "sources", or what the passages lack.
 - Don't add disclaimers or "see a doctor" lines; the page shows a disclaimer already. Mention seeing a doctor only if
   something looks urgent.
-- Plain language, no headings, no bullet points."""
+- Plain language, no headings, no bullet points.
+- If a nuclei analysis is included and it succeeded, use its measurements (count, cellularity, size variation) when
+  they help answer, and say they come from a nuclei segmentation model. If it says the analysis did not apply or found
+  nothing, mention that in one short sentence, then answer normally."""
 
 ANSWER_USER = """{history}Question: {question}
 
@@ -46,7 +49,7 @@ What the image appears to show ({modality}, {body_region}):
 {observations}
 Initial read: {short_answer}
 
-Reference passages:
+{tools}Reference passages:
 {sources}
 
 Write the answer now."""

@@ -35,7 +35,7 @@ def main_():
     rows = df.sample(n=min(a.n, len(df)), random_state=a.seed).to_dict("records")
 
     def vision(r):
-        uri = main._prepare_image(r["image"]["bytes"])
+        uri, _ = main._prepare_image(r["image"]["bytes"])
         t = time.time()
         try:
             f = llm.look(uri, r["question"]); err = None
