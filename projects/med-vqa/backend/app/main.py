@@ -23,7 +23,8 @@ if config.CORS_ORIGINS:
                        allow_headers=["*"])
 
 retriever = Retriever()
-log.info("index loaded: %d passages, model=%s, mock=%s", retriever.count(), config.MODEL, config.MOCK_LLM)
+log.info("index loaded: %d passages, provider=%s, model=%s, mock=%s, key set=%s",
+         retriever.count(), config.PROVIDER, config.MODEL, config.MOCK_LLM, config.llm_configured())
 
 # ---- per-IP rate limit (in memory; run a single uvicorn worker) ----
 _hits = defaultdict(deque)
@@ -69,9 +70,8 @@ def _prepare_image(data: bytes):
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "model": config.MODEL, "mock": config.MOCK_LLM,
-            "llm_configured": bool(config.OPENAI_API_KEY) or config.MOCK_LLM,
-            "index_passages": retriever.count()}
+    return {"status": "ok", "provider": config.PROVIDER, "model": config.MODEL, "mock": config.MOCK_LLM,
+            "llm_configured": config.llm_configured(), "index_passages": retriever.count()}
 
 
 @app.post("/api/ask")
@@ -89,6 +89,8 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
     t0 = time.time()
     try:
         findings = llm.look(uri, question)
+    except llm.RefusalError:
+        return _error(422, "The AI model declined to answer this request. Try a different image or question.")
     except llm.EngineError as e:
         log.warning("vision call failed: %s", e)
         return _error(502, "The AI model is unavailable right now. Try again in a minute.")
@@ -107,6 +109,8 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
 
     try:
         text = llm.answer(question, findings, hits)
+    except llm.RefusalError:
+        return _error(422, "The AI model declined to answer this request. Try a different image or question.")
     except llm.EngineError as e:
         log.warning("answer call failed: %s", e)
         return _error(502, "The AI model is unavailable right now. Try again in a minute.")
