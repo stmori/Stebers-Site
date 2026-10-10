@@ -6,6 +6,7 @@ that it doesn't apply, and the answer model says so while still answering normal
 import base64
 import io
 import os
+import re
 
 import numpy as np
 from PIL import Image
@@ -22,6 +23,12 @@ def looks_like_histology(findings):
     text = f'{findings.get("modality", "")} {findings.get("body_region", "")}'.lower()
     return any(w in text for w in HISTOLOGY_WORDS)
 
+
+
+def _short_modality(findings):
+    """'Chest X-ray (AP portable)' -> 'chest X-ray'; keeps acronyms like CT/MRI as they are."""
+    m = re.sub(r"\s*\(.*?\)", "", str(findings.get("modality") or "")).strip() or "image"
+    return m[0].lower() + m[1:] if len(m) > 1 and m[1].islower() else m
 
 class NucleiTool:
     def __init__(self, path=None):
@@ -75,8 +82,8 @@ class NucleiTool:
                         message="The nuclei model isn't installed on this server, so the analysis was skipped.")
         if not looks_like_histology(findings):
             return dict(status="not_applicable", tool=name,
-                        message=f'Nuclei analysis only works on H&E-stained histology images; this looks like '
-                                f'"{findings.get("modality", "a different kind of image")}", so it wasn\'t run.')
+                        message=f"The nuclei analysis tool only works on H&E-stained histology slides, so it wasn't "
+                                f"run on this {_short_modality(findings)}.")
         labels, n = self.segment(img)
         if n < 3:
             return dict(status="no_nuclei", tool=name, count=int(n),

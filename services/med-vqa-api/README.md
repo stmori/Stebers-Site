@@ -60,9 +60,10 @@ Errors: `400` bad image or question, `422` the model declined to answer, `429` r
 
 `app/tools/nuclei.py` runs Jake's **LoRA-fine-tuned MobileSAM** (rank-4 LoRA on the TinyViT encoder, trained on NuInsSeg, merged and exported to ONNX) on CPU with ONNX Runtime; no PyTorch in the container.
 
-- **When it runs:** only if the request sets `analyze_nuclei=true` **and** the vision model says the image is histology (H&E, pathology, tissue section, …). Otherwise it reports `not_applicable`, and the answer says so in one sentence and still answers the question.
-- **What it does:** resizes to 1024×1024 and makes one prompt-free forward pass (~1 s on CPU). Then sigmoid > 0.5 and connected components (blobs < 30 px dropped) give the nucleus count, area coverage (cellularity), and the coefficient of variation of nucleus size (a rough pleomorphism signal). It also builds a colored overlay image. The measurements are passed to the answer model.
-- **Model file:** `nuclei_lora.onnx` (~40 MB) lives **in the index folder** (`/index/nuclei_lora.onnx`, override with `NUCLEI_MODEL`), so it ships with the index tarball. If it's missing, the API still works and the tool reports `unavailable`.
+- **When it runs:** only if the request sets `analyze_nuclei=true` **and** the vision model says the image is histology (H&E, pathology, tissue section, …). Otherwise it reports `not_applicable` and the question is still answered normally.
+- **What it does:** resizes to 1024×1024 and makes one prompt-free forward pass (~1 s on CPU). Then sigmoid > 0.5 and connected components (blobs < 30 px dropped) give the nucleus count, area coverage (cellularity), and the coefficient of variation of nucleus size (a rough pleomorphism signal). It also builds an overlay image with outlined nuclei. The measurements are passed to the answer model as evidence.
+- **How the answer reports it:** the server always appends one standard line to the answer (`Nuclei analysis (LoRA MobileSAM): Found 14 nuclei …` or `Nuclei analysis: … wasn't run on this chest X-ray.`), and drops any sentence where the model restated the tool output, so the result appears exactly once.
+- **Model file:** `nuclei_lora.onnx` (52 MB; the 30-epoch retrain, fold-1 Dice 0.72 / AJI 0.59) lives **in the index folder** (`/index/nuclei_lora.onnx`, override with `NUCLEI_MODEL`), so it ships with the index tarball. If it's missing, the API still works and the tool reports `unavailable`.
 - **Training and export:** see the LoRA project (`jake_projects/lora-mobilesam-nuclei/`); the export script bakes the constant empty prompt into the ONNX graph.
 
 ## Run locally
