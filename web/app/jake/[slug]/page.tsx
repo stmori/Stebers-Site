@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProject, getProjects } from "../lib/content";
+import { getProject, getProjects, type GalleryItem } from "../lib/content";
 import { Chips, ExtLink, StatusBadge, TopBar, buttonClass } from "../ui";
 
 export const dynamicParams = false;
@@ -16,15 +16,47 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return p ? { title: p.short_title || p.title, description: p.summary } : {};
 }
 
+function Figure({ g }: { g: GalleryItem }) {
+  return (
+    <figure className="grid gap-2">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={g.src} alt={g.alt} loading="lazy" className="w-full rounded-xl border border-rule" />
+      {g.caption && <figcaption className="text-sm text-muted">{g.caption}</figcaption>}
+    </figure>
+  );
+}
+
+function Video({ v }: { v: { id: string; title: string } }) {
+  return (
+    <div className="aspect-video overflow-hidden rounded-xl border border-rule bg-raised">
+      <iframe
+        src={`https://www.youtube-nocookie.com/embed/${v.id}`}
+        title={v.title}
+        loading="lazy"
+        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        referrerPolicy="strict-origin-when-cross-origin"
+        className="h-full w-full"
+      />
+    </div>
+  );
+}
+
 export default async function ProjectPage({ params }: Props) {
   const p = getProject((await params).slug);
   if (!p) notFound();
   const solo = p.team?.length === 1;
   const meta = [p.period, p.context].filter(Boolean).join(" · ");
   const actions = [...(p.links || []), ...(p.documents || []).map((d) => ({ label: d.pages ? `${d.label} · ${d.pages} pp.` : d.label, url: d.url }))];
-  // The cover is shown as the hero, so skip it in the gallery unless the gallery has a caption for it.
-  const gallery = (p.gallery || []).filter((g) => g.src !== p.cover || g.caption);
-  const heroInGallery = gallery.some((g) => g.src === p.cover);
+  // Media leads the page: videos and gallery images sit right under the headline. A gallery item with
+  // `position: bottom` (e.g. the FSI team photo) goes at the end instead. A cover that isn't in the gallery
+  // is shown first among the images.
+  const gallery = p.gallery || [];
+  const inGallery = gallery.some((g) => g.src === p.cover);
+  const topImages = [
+    ...(p.cover && !inGallery ? [{ src: p.cover, alt: "" } as GalleryItem] : []),
+    ...gallery.filter((g) => g.position !== "bottom"),
+  ];
+  const bottomImages = gallery.filter((g) => g.position === "bottom");
 
   return (
     <>
@@ -50,6 +82,17 @@ export default async function ProjectPage({ params }: Props) {
           )}
         </header>
 
+        {(!!p.youtube?.length || !!topImages.length) && (
+          <section aria-label="Media" className="grid gap-6">
+            {(p.youtube || []).map((v) => (
+              <Video key={v.id} v={v} />
+            ))}
+            {topImages.map((g) => (
+              <Figure key={g.src} g={g} />
+            ))}
+          </section>
+        )}
+
         {!!p.metrics?.length && (
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {p.metrics.map((m) => (
@@ -60,11 +103,6 @@ export default async function ProjectPage({ params }: Props) {
               </div>
             ))}
           </dl>
-        )}
-
-        {p.cover && !heroInGallery && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={p.cover} alt="" className="w-full rounded-xl border border-rule" />
         )}
 
         {!!p.highlights?.length && (
@@ -83,33 +121,11 @@ export default async function ProjectPage({ params }: Props) {
 
         {p.html && <article className="jake-prose" dangerouslySetInnerHTML={{ __html: p.html }} />}
 
-        {!!p.youtube?.length && (
-          <section className="grid gap-4">
-            <h2 className="text-lg font-semibold">Video</h2>
-            {p.youtube.map((v) => (
-              <div key={v.id} className="aspect-video overflow-hidden rounded-xl border border-rule bg-raised">
-                <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${v.id}`}
-                  title={v.title}
-                  loading="lazy"
-                  allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  className="h-full w-full"
-                />
-              </div>
-            ))}
-          </section>
-        )}
-
-        {!!gallery.length && (
+        {!!bottomImages.length && (
           <section className="grid gap-4">
             <h2 className="text-lg font-semibold">Gallery</h2>
-            {gallery.map((g) => (
-              <figure key={g.src} className="grid gap-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={g.src} alt={g.alt} loading="lazy" className="w-full rounded-xl border border-rule" />
-                {g.caption && <figcaption className="text-sm text-muted">{g.caption}</figcaption>}
-              </figure>
+            {bottomImages.map((g) => (
+              <Figure key={g.src} g={g} />
             ))}
           </section>
         )}

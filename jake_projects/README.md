@@ -48,8 +48,8 @@ Every project uses the same YAML fields. Optional fields can be missing or empty
 | `tech` | list of strings | Stack, for tags |
 | `links` | list of `{label, url}` | GitHub, live demo, leaderboard, … (external links open in a new tab) |
 | `cover` | path | Card/hero image, relative to the project folder |
-| `gallery` | list of `{src, alt, caption}` | More images |
-| `youtube` | list of `{id, title}` | Embed with `https://www.youtube-nocookie.com/embed/<id>` |
+| `gallery` | list of `{src, alt, caption, position}` | Images, shown at the top of the project page under the headline. Add `position: bottom` to show one at the end of the page instead |
+| `youtube` | list of `{id, title}` | Videos, shown at the top of the project page (`https://www.youtube-nocookie.com/embed/<id>`) |
 | `documents` | list of `{label, url, pages}` | Reports and papers (linked, not stored here) |
 
 The Markdown **body** after the front matter is the full write-up. It uses `##` section headings (Overview, What I built, Results, …); no `#` title, since the page renders `title` itself.
