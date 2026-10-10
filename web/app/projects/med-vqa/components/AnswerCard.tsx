@@ -1,15 +1,11 @@
 import type { AskResponse, Citation, NucleiAnalysis, SimilarCase } from "../lib/types";
 
-/** Result of the optional nuclei tool: overlay + stats, or a short note when it didn't apply. */
+/**
+ * Result of the optional nuclei tool: overlay + stats. When the tool didn't run (not histology, no nuclei, model
+ * missing) there's nothing to show here: the API already ends the answer with a "Nuclei analysis: ..." line.
+ */
 function NucleiPanel({ n }: { n: NucleiAnalysis }) {
-  if (n.status !== "ok") {
-    return (
-      <p className="rounded-lg border border-rule bg-surface px-3 py-2 text-sm text-muted">
-        <span className="font-medium text-ink">Nuclei analysis: </span>
-        {n.message}
-      </p>
-    );
-  }
+  if (n.status !== "ok") return null;
   const stats: [string, string][] = [
     ["Nuclei", String(n.count ?? "–")],
     ["Cellularity", `${n.density ?? "–"} (${n.coverage_pct ?? "–"}% of area)`],
