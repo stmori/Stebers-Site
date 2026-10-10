@@ -40,8 +40,6 @@ export interface NucleiAnalysis {
   count?: number;
   coverage_pct?: number;
   mean_area_px?: number;
-  area_cv?: number;
-  size_variability?: string;
   density?: string;
   /** JPEG data URI of the image with each detected nucleus colored. */
   overlay?: string;
@@ -67,6 +65,8 @@ export interface Example {
   label: string;
   question: string;
   source: string;
+  /** Switch the nuclei-analysis toggle on when this example is picked (H&E examples). */
+  nuclei?: boolean;
 }
 
 export type ChatMessage =

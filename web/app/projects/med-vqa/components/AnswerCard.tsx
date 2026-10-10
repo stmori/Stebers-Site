@@ -7,9 +7,8 @@ import type { AskResponse, Citation, NucleiAnalysis, SimilarCase } from "../lib/
 function NucleiPanel({ n }: { n: NucleiAnalysis }) {
   if (n.status !== "ok") return null;
   const stats: [string, string][] = [
-    ["Nuclei", String(n.count ?? "–")],
+    ["Nuclei", n.count != null ? `about ${n.count}` : "–"],
     ["Cellularity", `${n.density ?? "–"} (${n.coverage_pct ?? "–"}% of area)`],
-    ["Size variation", `${n.size_variability ?? "–"} (CV ${n.area_cv ?? "–"})`],
   ];
   return (
     <section aria-label="Nuclei analysis" className="grid gap-2 rounded-lg border border-rule bg-surface p-3 text-sm">
@@ -26,7 +25,7 @@ function NucleiPanel({ n }: { n: NucleiAnalysis }) {
           </div>
         ))}
       </dl>
-      <p className="text-xs text-muted">{n.tool}. Measurements are relative (not calibrated to microns).</p>
+      <p className="text-xs text-muted">{n.tool}. Counts are approximate; it doesn't judge nuclear shape or atypia.</p>
     </section>
   );
 }

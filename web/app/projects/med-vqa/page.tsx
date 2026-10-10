@@ -125,6 +125,10 @@ export default function MedVqaPage() {
         const blob = await (await fetch(`${EXAMPLES_DIR}/${ex.file}`)).blob();
         const img = toImg(new File([blob], ex.file.split("/").pop() || "example.jpg", { type: blob.type || "image/jpeg" }));
         setHint(null);
+        if (ex.nuclei) {
+          nucleiRef.current = true; // run() reads the ref, so set it before the state update lands
+          setNuclei(true);
+        }
         run(img, ex.question, true, false);
         setCarried(img);
         setAttachment(null);
@@ -179,6 +183,7 @@ export default function MedVqaPage() {
                     key={ex.file}
                     type="button"
                     onClick={() => tryExample(ex)}
+                    title={`${ex.label} · ${ex.source}`}
                     className="grid gap-2 rounded-xl border border-rule bg-surface p-2 text-xs hover:border-accent"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
