@@ -1,10 +1,12 @@
 """Med-VQA API: POST /api/ask (image + question -> findings, cited answer), GET /api/health."""
 import base64
+import copy
+import hashlib
 import io
 import logging
 import re
 import time
-from collections import defaultdict, deque
+from collections import OrderedDict, defaultdict, deque
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,6 +48,33 @@ def _rate_limited(ip):
     return False
 
 
+# ---- answer cache: identical image + question returns the stored answer instantly, at no API cost ----
+_cache = OrderedDict()
+
+
+def _cache_key(data: bytes, question: str):
+    q = re.sub(r"\s+", " ", question.lower()).strip()
+    return hashlib.sha256(data + b"\0" + q.encode() + b"\0" + config.MODEL.encode()).hexdigest()
+
+
+def _cache_get(key):
+    hit = _cache.get(key)
+    if not hit or time.time() - hit[0] > config.CACHE_TTL_S:
+        _cache.pop(key, None)
+        return None
+    _cache.move_to_end(key)
+    return dict(copy.deepcopy(hit[1]), cached=True)
+
+
+def _cache_put(key, response):
+    if config.CACHE_SIZE <= 0:
+        return
+    _cache[key] = (time.time(), copy.deepcopy(response))
+    _cache.move_to_end(key)
+    while len(_cache) > config.CACHE_SIZE:
+        _cache.popitem(last=False)
+
+
 def _error(status, message):
     return JSONResponse(status_code=status, content={"error": message})
 
@@ -71,7 +100,7 @@ def _prepare_image(data: bytes):
 @app.get("/api/health")
 def health():
     return {"status": "ok", "provider": config.PROVIDER, "model": config.MODEL, "mock": config.MOCK_LLM,
-            "llm_configured": config.llm_configured(), "index_passages": retriever.count()}
+            "llm_configured": config.llm_configured(), "index_passages": retriever.count(), "cached_answers": len(_cache)}
 
 
 @app.post("/api/ask")
@@ -79,10 +108,16 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
     question = (question or "").strip()
     if not 3 <= len(question) <= config.MAX_QUESTION_CHARS:
         return _error(400, f"Ask a question between 3 and {config.MAX_QUESTION_CHARS} characters.")
+    data = image.file.read()
+    key = _cache_key(data, question)
+    cached = _cache_get(key)
+    if cached:                                     # repeat question: instant, free, not rate-limited
+        log.info("ask cache hit")
+        return cached
     if _rate_limited(_client_ip(request)):
         return _error(429, "Too many requests. Try again in a minute.")
     try:
-        uri = _prepare_image(image.file.read())
+        uri = _prepare_image(data)
     except ValueError as e:
         return _error(400, str(e))
 
@@ -97,10 +132,12 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
     t1 = time.time()
 
     if not findings["is_medical_image"]:
-        return {"findings": findings, "citations": [], "disclaimer": config.DISCLAIMER, "model": config.MODEL,
-                "answer": "This doesn't look like a medical image, so there is nothing to look up. "
-                          "Try an X-ray, CT, MRI or histology image.",
-                "timings_ms": {"vision": int((t1 - t0) * 1000), "retrieval": 0, "answer": 0}}
+        response = {"findings": findings, "citations": [], "disclaimer": config.DISCLAIMER, "model": config.MODEL,
+                    "answer": "This doesn't look like a medical image, so there is nothing to look up. "
+                              "Try an X-ray, CT, MRI or histology image.",
+                    "timings_ms": {"vision": int((t1 - t0) * 1000), "retrieval": 0, "answer": 0}, "cached": False}
+        _cache_put(key, response)
+        return response
 
     context = " ".join([question, findings["modality"], *findings["observations"]])
     hits = retriever.search_many([*findings["search_terms"], context])
@@ -120,5 +157,7 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
                       score=h["score"], cited=i in cited) for i, h in enumerate(hits, 1)]
     timings = {"vision": int((t1 - t0) * 1000), "retrieval": int((t2 - t1) * 1000), "answer": int((t3 - t2) * 1000)}
     log.info("ask ok %s", timings)  # never log the image or question text
-    return {"findings": findings, "answer": text, "citations": citations, "disclaimer": config.DISCLAIMER,
-            "model": config.MODEL, "timings_ms": timings}
+    response = {"findings": findings, "answer": text, "citations": citations, "disclaimer": config.DISCLAIMER,
+                "model": config.MODEL, "timings_ms": timings, "cached": False}
+    _cache_put(key, response)
+    return response
