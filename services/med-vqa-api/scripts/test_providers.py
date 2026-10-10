@@ -90,6 +90,21 @@ check("image downscaled to <=1024px", max(Image.open(io.BytesIO(__import__("base
 check("answer call: text only, sources included", isinstance(a["messages"][0]["content"], str)
       and "[1]" in a["messages"][0]["content"] and "format" not in a["output_config"])
 
+# --- answer cache: same image + question is served without calling the model
+fake2 = FakeMessages([("end_turn", json.dumps(FINDINGS)), ("end_turn", ANSWER)])
+claude._client = NS(messages=fake2)
+main._cache.clear()
+first = ask(c).json()
+second = ask(c).json()
+check("cache: first answer is fresh", first.get("cached") is False, first)
+check("cache: repeat is served from cache without a model call",
+      second.get("cached") is True and len(fake2.calls) == 2 and second["answer"] == first["answer"], len(fake2.calls))
+fake3 = FakeMessages([("end_turn", json.dumps(FINDINGS)), ("end_turn", ANSWER)])
+claude._client = NS(messages=fake3)
+r = c.post("/api/ask", files={"image": ("x.png", png_bytes(), "image/png")}, data={"question": "Is the heart enlarged?"})
+check("cache: a different question calls the model again", r.json().get("cached") is False and len(fake3.calls) == 2, r.text)
+main._cache.clear()
+
 # --- refusal and truncation
 claude._client = NS(messages=FakeMessages([("refusal", None)]))
 r = ask(c)

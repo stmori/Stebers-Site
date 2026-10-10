@@ -31,6 +31,9 @@ MAX_IMAGE_MB = float(_env("MAX_IMAGE_MB", "8"))
 MAX_SIDE_PX = int(_env("MAX_SIDE_PX", "1024"))
 MAX_QUESTION_CHARS = int(_env("MAX_QUESTION_CHARS", "500"))
 
+CACHE_SIZE = int(_env("CACHE_SIZE", "200"))         # identical image + question -> stored answer (0 = off)
+CACHE_TTL_S = int(_env("CACHE_TTL_S", "86400"))
+
 RATE_PER_MIN = int(_env("RATE_PER_MIN", "6"))
 RATE_PER_DAY = int(_env("RATE_PER_DAY", "60"))
 
