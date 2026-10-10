@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <div className={`${arimo.className} min-h-screen bg-[#f5f5f2] text-[#1a1a1a]`}>
       {/* Top bar */}
-      <header className="flex items-center justify-between px-10 py-6">
+      <header className="flex items-center justify-between px-10 py-5 mb-6 border-b-2 border-[#d4d4d4]">
         <span>jwes.design</span>
         <span>Contributors</span>
       </header>
@@ -27,7 +27,7 @@ export default function HomePage() {
           <img
             src="/med-vqa-screenshot.png"
             alt="Med-VQA chat interface"
-            className="pointer-events-none absolute right-0 top-[38%] z-0 w-[48%] select-none rounded-md opacity-40 shadow-2xl shadow-black/25 ring-1 ring-black/10 [mask-image:linear-gradient(to_right,rgba(0,0,0,0.45),black_20%)]"
+            className="pointer-events-none absolute right-3 top-[35%] z-0 w-[50%] select-none rounded-lg opacity-48 shadow-2xl shadow-black/25 ring-1 ring-black/10 [mask-image:linear-gradient(to_right,rgba(0,0,0,0.45),black_17%)]"
           />
         </div>
 
