@@ -16,7 +16,7 @@ summary: >-
   nuclei-analysis tool.
 highlights:
   - "Engineered a parameter-efficient fine-tuning (PEFT) pipeline that injects rank-4 LoRA adapters into MobileSAM's TinyViT attention layers, training only 29,696 parameters (~0.3% of the model) for edge-friendly inference"
-  - "Reached 0.72 Dice, 0.40 AJI and 0.32 Panoptic Quality on 133 held-out NuInsSeg tiles (31 human and mouse organs) with prompt-free inference: one forward pass, thresholding and a watershed split of touching nuclei"
+  - "Reached 0.72 Dice, 0.40 AJI and 0.34 Panoptic Quality on 133 held-out NuInsSeg tiles (31 human and mouse organs) with prompt-free inference: one forward pass, smoothing, thresholding and a watershed split of touching nuclei"
   - "Audited the evaluation: the original AJI implementation subtracted matched pixels twice (inflating scores, sometimes above 1), so all results were re-measured with the standard AJI and PQ definitions"
   - "Merged the LoRA weights back into the base model and exported it to ONNX for CPU inference, so it now runs as the optional nuclei-analysis tool inside Med-VQA"
 metrics:
@@ -48,7 +48,7 @@ Counting and outlining cell nuclei in H&E-stained tissue is a basic step in comp
 ## Approach
 
 - **LoRA on the image encoder.** Every attention `qkv` projection in TinyViT is wrapped with a rank-4 low-rank adapter (α = 8), and all original weights stay frozen. Only **29,696 parameters** are trained, about 0.3% of MobileSAM.
-- **Prompt-free decoding.** The mask decoder gets an empty prompt and predicts a nuclei probability map for the whole tile in a single pass. Thresholding plus connected components turns it into nucleus instances; in the deployed version a distance-transform watershed then splits touching nuclei.
+- **Prompt-free decoding.** The mask decoder gets an empty prompt and predicts a nuclei probability map for the whole tile in a single pass. Thresholding plus connected components turns it into nucleus instances; in the deployed version the logits are lightly smoothed first and a distance-transform watershed then splits touching nuclei.
 - **Training.** NuInsSeg (665 H&E tiles from 31 human and mouse organs) at 1024×1024, BCE loss, AdamW (learning rate 1e-4), batch 2, 5-fold cross-validation (10 epochs per fold in the course report).
 - **Evaluation.** Dice for pixel accuracy, plus the instance-level metrics used in pathology: Aggregated Jaccard Index (AJI) and Panoptic Quality (PQ), which reward separating each nucleus correctly.
 
@@ -60,9 +60,9 @@ The course report trained 10 epochs per fold (5-fold mean Dice 0.61) with the lo
 |---|---|---|---|
 | 10 epochs (course setup) | 0.673 | 0.300 | 0.246 |
 | 30 epochs | 0.720 | 0.283 | 0.267 |
-| **30 epochs + watershed split (deployed)** | **0.720** | **0.404** | **0.320** |
+| **30 epochs + smoothing and watershed split (deployed)** | **0.720** | **0.404** | **0.336** |
 
-Longer training improves pixel accuracy. Splitting touching nuclei is what improves the instance metrics, and it fixes the count: the median ratio of predicted to true nuclei per tile went from 0.75 to 1.04.
+Longer training improves pixel accuracy. Splitting touching nuclei (after lightly smoothing the logits) is what improves the instance metrics, and it fixes the count: the median ratio of predicted to true nuclei per tile went from 0.75 to 0.97, and its correlation with the true count from 0.38 to 0.70.
 
 **A note on the metrics.** While re-evaluating, I found that the AJI formula in the original course script subtracts the matched intersection twice, which inflates AJI (it can even exceed 1). The report's AJI figures therefore aren't comparable to published results; the table above uses the standard definitions.
 
