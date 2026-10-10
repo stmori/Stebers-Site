@@ -5,7 +5,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: ${WEB_DOCKERFILE:-frontend/Dockerfile}   # set WEB_DOCKERFILE=deploy/web-fallback.Dockerfile for the backup UI
+      dockerfile: ${WEB_DOCKERFILE:-deploy/web-fallback.Dockerfile}   # built-in Med-VQA page (fallback-ui/); the main website lives in /site
     environment:
       DOMAIN: ${DOMAIN:-:80}
     ports:

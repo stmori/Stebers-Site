@@ -46,7 +46,7 @@ sudo chown -R 1000:1000 index           # Linux only (the app runs as user 1000 
 docker compose up --build                 # http://localhost
 ```
 
-The backup UI (plain HTML in `fallback-ui/`) runs with `WEB_DOCKERFILE=deploy/web-fallback.Dockerfile` in `.env`. The Next.js frontend uses `deploy/frontend.Dockerfile` copied to `frontend/Dockerfile`, with `output: "export"` in `next.config`.
+By default the `web` container serves the built-in Med-VQA page (`fallback-ui/`). The main website lives in `/site`; `deploy/frontend.Dockerfile` is a template for serving a static Next.js export instead (set `WEB_DOCKERFILE` in `.env`).
 
 ## Deploy (Ubuntu VPS + your domain)
 
