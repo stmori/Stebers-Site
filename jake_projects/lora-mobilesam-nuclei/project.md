@@ -16,12 +16,12 @@ summary: >-
   nuclei-analysis tool.
 highlights:
   - "Engineered a parameter-efficient fine-tuning (PEFT) pipeline that injects rank-4 LoRA adapters into MobileSAM's TinyViT attention layers, training only 29,696 parameters (~0.3% of the model) for edge-friendly inference"
-  - "Reached 0.77 mean IoU and 0.81 F1 on NuInsSeg (31 human and mouse organs) using prompt-free inference: one forward pass and connected components, no clicks or boxes"
-  - "Evaluated with 5-fold cross-validation using pathology-standard instance metrics (Dice, Aggregated Jaccard Index, Panoptic Quality) with Hungarian matching"
+  - "Reached 0.72 Dice/F1 and 0.59 Aggregated Jaccard Index on held-out NuInsSeg tiles (31 human and mouse organs) with prompt-free inference: one forward pass and connected components, no clicks or boxes"
+  - "Evaluated with 5-fold cross-validation using pathology-standard instance metrics (Dice, AJI, Panoptic Quality) with Hungarian matching; a longer 30-epoch retrain raised AJI from 0.47 to 0.59 on the same validation fold"
   - "Merged the LoRA weights back into the base model and exported it to ONNX for CPU inference, so it now runs as the optional nuclei-analysis tool inside Med-VQA"
 metrics:
-  - {value: "0.77", label: "mean IoU"}
-  - {value: "0.81", label: "F1"}
+  - {value: "0.72", label: "Dice / F1"}
+  - {value: "0.59", label: "AJI (instance)"}
   - {value: "29.7k", label: "trainable parameters (~0.3%)"}
   - {value: "rank 4", label: "LoRA adapters"}
 tech: [Python, PyTorch, MobileSAM, TinyViT, LoRA, PEFT, scikit-image, ONNX Runtime, NuInsSeg]
@@ -32,6 +32,8 @@ cover: media/architecture.jpg
 gallery:
   - {src: media/architecture.jpg, alt: "Diagram: frozen MobileSAM encoder, decoder and prompt encoder, with LoRA down/up-projection matrices added to an attention layer",
      caption: "Architecture: LoRA adapters inside MobileSAM's frozen TinyViT encoder"}
+  - {src: media/retrained-val-example.jpg, alt: "Validation H&E tile, ground-truth nuclei, and predictions from the 30-epoch retrained model side by side",
+     caption: "Held-out tile: original, ground truth, 30-epoch model prediction"}
   - {src: media/report-fold1-example.jpg, alt: "H&E tile, ground-truth nuclei instances, and LoRA predictions side by side",
      caption: "Original H&E tile, ground-truth nuclei, and LoRA prediction (from the course report)"}
 youtube: []
@@ -47,13 +49,21 @@ Counting and outlining cell nuclei in H&E-stained tissue is a basic step in comp
 
 - **LoRA on the image encoder.** Every attention `qkv` projection in TinyViT is wrapped with a rank-4 low-rank adapter (α = 8), and all original weights stay frozen. Only **29,696 parameters** are trained, about 0.3% of MobileSAM.
 - **Prompt-free decoding.** The mask decoder gets an empty prompt and predicts a nuclei probability map for the whole tile in a single pass. Thresholding plus connected components turns it into individual nucleus instances.
-- **Training.** NuInsSeg (H&E tiles from 31 human and mouse organs) at 1024×1024, BCE loss, AdamW (learning rate 1e-4), 5-fold cross-validation.
+- **Training.** NuInsSeg (665 H&E tiles from 31 human and mouse organs) at 1024×1024, BCE loss, AdamW (learning rate 1e-4), batch 2, 5-fold cross-validation (10 epochs per fold in the course report).
 - **Evaluation.** Pixel IoU and F1, plus the instance-level metrics used in pathology: Dice, Aggregated Jaccard Index (AJI) and Panoptic Quality (PQ), with Hungarian matching between predicted and ground-truth nuclei.
 
 ## Results
 
-**0.77 mean IoU** and **0.81 F1**, with metrics still rising when training stopped at 10 epochs. Longer schedules are the obvious next step.
+The course report trained 10 epochs per fold and averaged **Dice 0.61, AJI 0.42, PQ 0.14** over 5 folds, with the loss still falling. So I retrained on fold 1 for **30 epochs** with everything else unchanged and measured the same 133 held-out tiles:
+
+| Fold 1 (133 validation tiles) | Dice / F1 | Pixel IoU | AJI | PQ |
+|---|---|---|---|---|
+| Report, 10 epochs | 0.665 | – | 0.466 | 0.165 |
+| Retrain, 10 epochs | 0.674 | 0.529 | 0.438 | 0.172 |
+| **Retrain, 30 epochs (deployed)** | **0.720** | **0.585** | **0.595** | **0.186** |
+
+The biggest gain is in AJI, which means nuclei are separated into the right instances more often instead of merged blobs. PQ is still low because touching nuclei often merge after thresholding. A watershed or distance-map head is the next step.
 
 ## In production: Med-VQA nuclei analysis
 
-I merged the LoRA weights back into the base model (`W' = W + (A·B)·α/r`), so it runs as a plain MobileSAM, and exported it to **ONNX** for CPU inference on the Med-VQA server. With the *nuclei analysis* toggle on, an H&E histology image gets a nuclei count, density, size variation and a colored overlay. The answer model uses those measurements, and for non-histology images it says the tool doesn't apply.
+I merged the 30-epoch LoRA weights back into the base model (`W' = W + (A·B)·α/r`), so it runs as a plain MobileSAM, and exported it to **ONNX** (52 MB, ~1.2 s per tile on CPU, identical masks to PyTorch) for the Med-VQA server. With the *nuclei analysis* toggle on, an H&E histology image gets a nuclei count, density, size variation and a colored overlay. The answer model uses those measurements, and for non-histology images it says the tool doesn't apply.
