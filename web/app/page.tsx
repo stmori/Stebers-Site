@@ -1,6 +1,18 @@
 import { Arimo } from "next/font/google";
+import ProjectEntry, { type Project } from "./components/ProjectEntry";
 
 const arimo = Arimo({ subsets: ["latin"] });
+
+// One entry per project, shown top to bottom. To add a project, add an object here.
+const projects: Project[] = [
+  {
+    title: "MED VQA",
+    description:
+      "Users can upload medical imagery (such as X-rays, MRIs, or histology slides), and the system uses a Vision-Language Model (VLM) combined with a Vector Database to identify physical anomalies, retrieve relevant medical literature, and generate a cited diagnostic summary. To demonstrate cloud infrastructure and MLOps competency, the entire application will be decoupled into microservices and containerized using Docker.",
+    contributors: ["Jake", "Evanton"],
+    image: { src: "/med-vqa-screenshot.png", alt: "Med-VQA chat interface" },
+  },
+];
 
 export default function HomePage() {
   return (
@@ -14,32 +26,10 @@ export default function HomePage() {
       </header>
 
       {/* Main */}
-      <main className="px-8 pb-[30vw]">
-        <h1 className="bg-[linear-gradient(to_bottom,#111111,#3d3d3d)] bg-clip-text text-6xl font-bold tracking-tight text-transparent [filter:drop-shadow(0_6px_14px_rgba(0,0,0,0.10))]">
-          MED VQA
-        </h1>
-
-        {/* Description, with the screenshot behind its lower-right part */}
-        <div className="relative mt-4">
-          <p className="relative z-10 w-[65%] border-l-2 border-[#1a1a1a]/15 pl-6 text-base leading-relaxed text-[#2e2e2e]">
-            Users can upload medical imagery (such as X-rays, MRIs, or histology slides), and the system uses a Vision-Language Model
-            (VLM) combined with a Vector Database to identify physical anomalies, retrieve relevant medical literature, and generate a
-            cited diagnostic summary. To demonstrate cloud infrastructure and MLOps competency, the entire application will be
-            decoupled into microservices and containerized using Docker.
-          </p>
-
-          {/* Wrapper carries the shadow and a slight 3D tilt; the image keeps your opacity and fade */}
-          <div className="pointer-events-none absolute right-4 top-[39%] z-0 w-[50%] rounded-lg shadow-[0_40px_80px_-30px_rgba(0,0,0,0.30),0_18px_36px_-18px_rgba(0,0,0,0.18)] [transform:perspective(1800px)_rotateY(-6deg)_rotateX(2deg)] [transform-origin:right_center]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/med-vqa-screenshot.png"
-              alt="Med-VQA chat interface"
-              className="block w-full select-none rounded-lg opacity-48 ring-1 ring-black/10 [mask-image:linear-gradient(to_right,rgba(0,0,0,0.45),black_17%)]"
-            />
-          </div>
-        </div>
-
-        <p className="relative z-10 mt-8 pl-6 text-xs font-semibold uppercase tracking-[0.2em] text-[#6a6a6a]">Contributors:</p>
+      <main className="space-y-12 px-8 pb-24">
+        {projects.map((project) => (
+          <ProjectEntry key={project.title} {...project} />
+        ))}
       </main>
     </div>
   );
