@@ -1,6 +1,10 @@
+import { Arimo } from "next/font/google";
+
+const arimo = Arimo({ subsets: ["latin"] });
+
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#f5f5f2] text-[#1a1a1a]">
+    <div className={`${arimo.className} min-h-screen bg-[#f5f5f2] text-[#1a1a1a]`}>
       {/* Top bar */}
       <header className="flex items-center justify-between px-8 py-6">
         <span>jwes.design</span>
