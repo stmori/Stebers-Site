@@ -7,9 +7,7 @@ Jake and Evanton's website: a shared landing page, a portfolio page for each of 
 Folders are split by what gets deployed, not by URL. The website is one app; each project's backend is its own service next to it.
 
 ```
-web/                            # the whole website (Next.js)                       — Evanton
-├── app/page.tsx                  /
-├── app/projects/page.tsx         /projects/
+web/                            # frontend (Next.js)                                — Evanton
 └── app/projects/med-vqa/         /projects/med-vqa/   (chat UI: page.tsx + its components/ and lib/)
 services/
 ├── med-vqa-api/                # FastAPI + ChromaDB retrieval, index scripts         — Jake

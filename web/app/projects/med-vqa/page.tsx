@@ -139,12 +139,9 @@ export default function MedVqaPage() {
   };
 
   return (
-    <div className="theme-dark relative flex h-dvh flex-col">
+    <div className="theme-dark relative flex min-h-screen flex-col">
       {/* Top bar */}
       <header className="flex h-14 shrink-0 items-center gap-3 border-b border-rule px-4">
-        <a href="/projects/" className="text-sm text-muted hover:text-ink" aria-label="Back to projects">
-          ←
-        </a>
         <h1 className="font-semibold">Med-VQA</h1>
         <span className="hidden text-xs text-muted sm:inline">Educational demo · not medical advice</span>
         {messages.length > 0 && (
@@ -159,7 +156,7 @@ export default function MedVqaPage() {
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1">
         <div className="mx-auto w-full max-w-3xl px-4 py-6">
           {messages.length === 0 ? (
             <div className="grid gap-8 pt-[8vh] text-center">
@@ -190,8 +187,8 @@ export default function MedVqaPage() {
         </div>
       </div>
 
-      {/* Chat entry, pinned to the bottom */}
-      <div className="shrink-0 px-4 pb-4">
+      {/* Chat entry, at the bottom */}
+      <div className="sticky bottom-0 bg-bg px-4 pb-4 pt-2">
         <div className="mx-auto w-full max-w-3xl">
           <Composer
             value={question}

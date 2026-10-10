@@ -61,7 +61,7 @@ body {
   * { scroll-behavior: auto !important; }
 }
 
-/* Always-dark scheme for full-screen apps (Med-VQA chat). Redefines the same tokens, so every
+/* Always-dark scheme for the Med-VQA chat. Redefines the same tokens, so every
    bg-* / text-* / border-* utility inside .theme-dark picks these up. */
 .theme-dark {
   --color-bg: #0d1117;
