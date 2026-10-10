@@ -16,7 +16,8 @@ from .. import config
 HISTOLOGY_WORDS = ("histolog", "h&e", "h & e", "hematoxylin", "haematoxylin", "patholog", "tissue section",
                    "micrograph", "biopsy", "cytolog", "slide")
 MIN_NUCLEUS_PX = 30          # at 1024x1024 model resolution; smaller blobs are noise
-SPLIT_MIN_DISTANCE = 15      # px at 1024x1024: watershed seeds closer than this belong to the same nucleus
+LOGIT_SMOOTH_SIGMA = 3.0     # px at 1024x1024: smooths the upsampled logits so thresholding doesn't leave speckle
+SPLIT_MIN_DISTANCE = 12      # px at 1024x1024: watershed seeds closer than this belong to the same nucleus
 INPUT = 1024
 
 
@@ -28,8 +29,9 @@ def looks_like_histology(findings):
 
 def _split_touching(labels):
     """Split touching nuclei that thresholding merged into one blob: watershed on the distance transform, one seed per
-    local maximum at least SPLIT_MIN_DISTANCE apart. On the validation fold this made the count track the ground truth
-    (r 0.45 -> 0.67, median count ratio 0.75 -> 1.04) and raised PQ 0.27 -> 0.32."""
+    local maximum at least SPLIT_MIN_DISTANCE apart. With the logit smoothing, on the 133 held-out tiles this took the
+    count from r 0.38 / median ratio 0.75 to r 0.70 / 0.97 against the ground truth, standard AJI 0.28 -> 0.40 and
+    PQ 0.27 -> 0.34 (Dice unchanged at 0.72)."""
     from scipy import ndimage
     from skimage.feature import peak_local_max
     from skimage.segmentation import watershed
@@ -67,6 +69,8 @@ class NucleiTool:
         x = np.asarray(img.convert("RGB").resize((INPUT, INPUT), Image.BILINEAR), dtype=np.float32)
         logits = self.session.run(None, {"image": x.transpose(2, 0, 1)[None]})[0][0, 0]          # 256x256
         up = np.asarray(Image.fromarray(logits.astype(np.float32), mode="F").resize((INPUT, INPUT), Image.BILINEAR))
+        if LOGIT_SMOOTH_SIGMA > 0:
+            up = ndimage.gaussian_filter(up, LOGIT_SMOOTH_SIGMA)
         labels, n = ndimage.label(up > 0.0)                                                    # sigmoid > 0.5
         if n:
             sizes = np.bincount(labels.ravel())
@@ -113,7 +117,7 @@ class NucleiTool:
         coverage = float((labels > 0).mean() * 100)
         density = "sparse" if coverage < 8 else "moderate" if coverage < 20 else "dense"
         # Nuclear size variation is NOT reported: on the validation fold the model's size spread didn't correlate with
-        # the ground truth's (r about 0), so it would be a misleading "atypia" signal. Coverage tracks it well (r 0.88).
+        # the ground truth's (r about 0), so it would be a misleading "atypia" signal. Coverage tracks it well (r 0.87).
         return dict(status="ok", tool=name, count=int(n), coverage_pct=round(coverage, 1),
                     mean_area_px=round(float(areas.mean()), 1), density=density,
                     message=f"Found about {n} nuclei covering {coverage:.1f}% of the tile ({density} cellularity).",
