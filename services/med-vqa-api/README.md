@@ -13,7 +13,7 @@ browser ──HTTPS──▶ web (Caddy: TLS, static site, /api/med-vqa/* proxy)
                                                                    └─ 3. language model: findings + top-5 passages → answer with [n] citations
 ```
 
-- **Model:** any OpenAI-compatible chat model with image input (`MODEL`, default `gpt-4o-mini`). Set `OPENAI_BASE_URL` to use a self-hosted vLLM server instead; we tested the pipeline against Qwen3.5-9B on vLLM.
+- **Model:** Claude Haiku 5.5 (`claude-haiku-5-5`) through the Anthropic API by default: cheap (about $0.10 / $0.50 per million input/output tokens), fast, reads images, and returns schema-guaranteed JSON for the findings step. Set `PROVIDER=openai` to use OpenAI or any OpenAI-compatible server instead (`OPENAI_BASE_URL`); we tested that path against Lingshu-7B on vLLM.
 - **Knowledge base:** MedQuAD (NIH: MedlinePlus, GARD, GHR, NHLBI, …). Every citation links to its source page.
 - **Privacy:** images are resized and re-encoded in memory (metadata stripped), never written to disk or logged. They are sent to the model provider.
 - **Abuse limits:** per-IP rate limit (6/min, 60/day by default), 8 MB image cap, 500-character question cap.
@@ -30,23 +30,24 @@ The container serves `/api/...`. Through Caddy the public paths are `/api/med-vq
                "observations": ["..."], "short_answer": "..."},
   "answer": "... [1] ... [2]",
   "citations": [{"n": 1, "title": "...", "url": "https://...", "source": "...", "snippet": "...", "score": 0.79, "cited": true}],
-  "disclaimer": "...", "model": "gpt-4o-mini",
+  "disclaimer": "...", "model": "claude-haiku-5-5",
   "timings_ms": {"vision": 3100, "retrieval": 40, "answer": 2800}
 }
 ```
 
-Errors: `400` bad image or question, `429` rate limited, `502` model unavailable. All return `{"error": "<message for the user>"}`.
+Errors: `400` bad image or question, `422` the model declined to answer, `429` rate limited, `502` model unavailable. All return `{"error": "<message for the user>"}`.
 
-`GET /api/health` → `{"status": "ok", "model": "...", "llm_configured": true, "index_passages": 16346}`. Interactive docs at `/api/docs` on the container (port 8000); not exposed through Caddy.
+`GET /api/health` → `{"status": "ok", "provider": "anthropic", "model": "claude-haiku-5-5", "mock": false, "llm_configured": true, "index_passages": 16346}`. Interactive docs at `/api/docs` on the container (port 8000); not exposed through Caddy.
 
 ## Run locally
 
 From the repo root:
 
 ```bash
-cp deploy/.env.example deploy/.env        # add OPENAI_API_KEY, or set MOCK_LLM=1 to run without a key
+cp deploy/.env.example deploy/.env        # add ANTHROPIC_API_KEY, or set MOCK_LLM=1 to run without a key
 mkdir -p services/med-vqa-api/index && tar xzf index_medquad.tar.gz \
   && mv index_medquad/* services/med-vqa-api/index/ && rmdir index_medquad
+sudo chown -R 1000:1000 services/med-vqa-api/index   # Linux only: the app runs as user 1000 and must be able to write here
 cd deploy && docker compose up --build    # http://localhost/projects/med-vqa/
 ```
 
@@ -59,8 +60,8 @@ The backup UI (plain HTML in `fallback-ui/`) runs with `WEB_DOCKERFILE=deploy/we
 3. On the VPS:
    ```bash
    git clone <repo> /opt/stebers-site && cd /opt/stebers-site && bash deploy/setup_vps.sh
-   # copy index_medquad.tar.gz here (scp), unpack into services/med-vqa-api/index as above
-   cp deploy/.env.example deploy/.env && nano deploy/.env   # OPENAI_API_KEY, DOMAIN="yourdomain.tech, www.yourdomain.tech"
+   # copy index_medquad.tar.gz here (scp), unpack into services/med-vqa-api/index as above, then: chown -R 1000:1000 services/med-vqa-api/index
+   cp deploy/.env.example deploy/.env && nano deploy/.env   # ANTHROPIC_API_KEY, DOMAIN="yourdomain.tech, www.yourdomain.tech"
    cd deploy && docker compose up -d --build
    ```
 4. Once `dig +short yourdomain.tech` returns the IP, Caddy issues the HTTPS certificate on the first request.

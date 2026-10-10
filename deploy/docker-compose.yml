@@ -25,7 +25,7 @@ services:
     build: ../services/med-vqa-api
     env_file: .env
     volumes:
-      - ../services/med-vqa-api/index:/index:ro   # unpacked index_medquad (index_info.json + chroma.sqlite3 + ...)
+      - ../services/med-vqa-api/index:/index   # unpacked index_medquad; ChromaDB needs write access even to read (on Linux: chown -R 1000:1000)
     expose:
       - "8000"
     # ports: ["8000:8000"]     # uncomment to call the API directly from `next dev`

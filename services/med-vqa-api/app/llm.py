@@ -1,34 +1,19 @@
-"""The two model calls: (1) look at the image -> structured findings, (2) write a cited answer."""
+"""The two model calls: (1) look at the image -> structured findings, (2) write a cited answer.
+
+The provider (Claude or OpenAI) is chosen by PROVIDER in .env; both return the same shapes.
+"""
 import json
 import re
 
-from openai import OpenAI
-
 from . import config, prompts
+from .errors import EngineError, RefusalError  # noqa: F401  (re-exported for main.py)
 
-
-class EngineError(Exception):
-    pass
-
-
-_client = None
-
-
-def client():
-    global _client
-    if _client is None:
-        _client = OpenAI(api_key=config.OPENAI_API_KEY or "missing", base_url=config.OPENAI_BASE_URL,
-                         timeout=config.LLM_TIMEOUT_S, max_retries=1)
-    return _client
-
-
-def _chat(messages, **kw):
-    try:
-        r = client().chat.completions.create(model=config.MODEL, messages=messages,
-                                             extra_body=config.LLM_EXTRA_BODY or None, **kw)
-    except Exception as e:  # network, auth, rate limit, timeout
-        raise EngineError(f"{type(e).__name__}: {e}") from e
-    return (r.choices[0].message.content or "").strip()
+if config.PROVIDER == "anthropic":
+    from .providers import claude as provider
+elif config.PROVIDER == "openai":
+    from .providers import openai_chat as provider
+else:
+    raise ValueError(f"PROVIDER must be 'anthropic' or 'openai', not {config.PROVIDER!r}")
 
 
 def _parse_json(text):
@@ -49,12 +34,8 @@ def look(image_data_uri, question):
     if config.MOCK_LLM:
         return dict(is_medical_image=True, modality="Chest X-ray (PA) [mock]", body_region="Chest",
                     observations=["Mock mode: no model was called", "Possible right upper lobe opacity"],
-                    short_answer="Mock answer. Set OPENAI_API_KEY and MOCK_LLM=0 for real output.")
-    raw = _chat([{"role": "system", "content": prompts.VISION_SYSTEM},
-                 {"role": "user", "content": [
-                     {"type": "image_url", "image_url": {"url": image_data_uri}},
-                     {"type": "text", "text": prompts.VISION_USER.format(question=question)}]}],
-                temperature=0, max_tokens=400, response_format={"type": "json_object"})
+                    short_answer="Mock answer. Set MOCK_LLM=0 and an API key for real output.")
+    raw = provider.look(image_data_uri, question, prompts.VISION_SYSTEM, prompts.VISION_USER.format(question=question))
     f = _parse_json(raw) or {}
     obs = f.get("observations") or []
     if isinstance(obs, str):
@@ -76,5 +57,4 @@ def answer(question, findings, hits):
                                      observations="; ".join(findings["observations"]) or "none reported",
                                      short_answer=findings["short_answer"],
                                      sources=prompts.format_sources(hits))
-    return _chat([{"role": "system", "content": prompts.ANSWER_SYSTEM},
-                  {"role": "user", "content": msg}], temperature=0.2, max_tokens=500)
+    return provider.answer(prompts.ANSWER_SYSTEM, msg)
