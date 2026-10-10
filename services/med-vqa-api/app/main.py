@@ -102,9 +102,8 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
                           "Try an X-ray, CT, MRI or histology image.",
                 "timings_ms": {"vision": int((t1 - t0) * 1000), "retrieval": 0, "answer": 0}}
 
-    query = " ".join([question, findings["modality"], findings["body_region"],
-                      *findings["observations"], findings["short_answer"]])
-    hits = retriever.search(query)
+    context = " ".join([question, findings["modality"], *findings["observations"]])
+    hits = retriever.search_many([*findings["search_terms"], context])
     t2 = time.time()
 
     try:

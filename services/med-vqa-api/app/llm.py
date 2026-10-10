@@ -34,17 +34,23 @@ def look(image_data_uri, question):
     if config.MOCK_LLM:
         return dict(is_medical_image=True, modality="Chest X-ray (PA) [mock]", body_region="Chest",
                     observations=["Mock mode: no model was called", "Possible right upper lobe opacity"],
-                    short_answer="Mock answer. Set MOCK_LLM=0 and an API key for real output.")
+                    short_answer="Mock answer. Set MOCK_LLM=0 and an API key for real output.",
+                    search_terms=["pneumonia", "pleural effusion"])
     raw = provider.look(image_data_uri, question, prompts.VISION_SYSTEM, prompts.VISION_USER.format(question=question))
     f = _parse_json(raw) or {}
     obs = f.get("observations") or []
     if isinstance(obs, str):
         obs = [obs]
+    terms = f.get("search_terms") or []
+    if isinstance(terms, str):
+        terms = [terms]
+    terms = [str(t).strip()[:60] for t in terms if str(t).strip()][:4]
     return dict(is_medical_image=bool(f.get("is_medical_image", True)),
                 modality=str(f.get("modality") or "Unknown"),
                 body_region=str(f.get("body_region") or "Unknown"),
                 observations=[str(o) for o in obs][:5],
-                short_answer=str(f.get("short_answer") or raw[:300]))
+                short_answer=str(f.get("short_answer") or raw[:300]),
+                search_terms=terms)
 
 
 def answer(question, findings, hits):
