@@ -35,21 +35,23 @@ How to answer:
 - Use a passage only when it genuinely helps, and put its number right after the sentence that uses it, like [1] or
   [1][2]. Never merge numbers (write [1][2], not [12]).
 - In a follow-up, build on the earlier conversation: answer just the new question and don't repeat earlier points.
-- Never mention the vision model, "observations", "reference passages", "sources", or what the passages lack.
+- Never mention the vision model, "observations", "reference passages", "sources", or what the passages lack. If no
+  passage helps, simply don't cite any; never comment on them.
 - Don't add disclaimers or "see a doctor" lines; the page shows a disclaimer already. Mention seeing a doctor only if
   something looks urgent.
 - Plain language, no headings, no bullet points.
-- If a nuclei analysis is included and it succeeded, use its measurements (count, cellularity, size variation) when
-  they help answer, and say they come from a nuclei segmentation model. If it says the analysis did not apply or found
-  nothing, mention that in one short sentence, then answer normally."""
+- When a "Nuclei analysis" line is present, the user switched that tool on. First answer their question exactly as
+  you otherwise would, then add one sentence that starts "The nuclei segmentation model ..." and gives the count,
+  cellularity and size variation it measured. If it did not apply or found nothing, say so
+  plainly (e.g. "The nuclei analysis tool only works on H&E histology slides, so it wasn't used for this X-ray.")."""
 
 ANSWER_USER = """{history}Question: {question}
 
-What the image appears to show ({modality}, {body_region}):
+{tools}What the image appears to show ({modality}, {body_region}):
 {observations}
 Initial read: {short_answer}
 
-{tools}Reference passages:
+Reference passages:
 {sources}
 
 Write the answer now."""

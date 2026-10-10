@@ -93,6 +93,20 @@ def _cache_put(key, response):
         _cache.popitem(last=False)
 
 
+def _ensure_tool_mention(text, nuclei):
+    """The answer must say whether the requested nuclei tool ran. If the model left it out, append the tool's own sentence."""
+    if not nuclei:
+        return text
+    t = text.lower()
+    if nuclei["status"] == "ok":
+        if str(nuclei.get("count")) in text and "nucle" in t:
+            return text
+        return f'{text}\n\nA nuclei segmentation model {nuclei["message"][0].lower()}{nuclei["message"][1:]}'
+    if "nucle" in t and any(w in t for w in ("analysis", "segmentation", "tool")):
+        return text
+    return f'{text}\n\n{nuclei["message"]}'
+
+
 def _split_merged_citations(text, n_sources):
     """Fix citations the model glued together, e.g. "[12]" with 5 sources becomes "[1][2]"."""
     def fix(m):
@@ -200,7 +214,7 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
         return _error(502, "The AI model is unavailable right now. Try again in a minute.")
     t3 = time.time()
 
-    text = _split_merged_citations(text, len(hits))
+    text = _ensure_tool_mention(_split_merged_citations(text, len(hits)), nuclei)
     cited = {int(n) for n in re.findall(r"\[(\d+)\]", text)}
     citations = [dict(n=i, title=h["title"], url=h["url"], source=h["source"], snippet=h["text"][:400],
                       score=h["score"], cited=i in cited) for i, h in enumerate(hits, 1)]

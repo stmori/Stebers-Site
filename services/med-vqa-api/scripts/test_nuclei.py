@@ -35,6 +35,15 @@ def ask(img_bytes, fnd, on=True):
     return r, fake
 
 c = TestClient(main.app)
+
+# the answer must always say whether the requested tool ran
+na = {"status": "not_applicable", "message": "Nuclei analysis only works on H&E-stained histology images; this looks like an X-ray."}
+okr = {"status": "ok", "count": 48, "message": "Found 48 nuclei covering 15.1% of the tile."}
+check("guarantee: missing 'not applicable' note is appended", main._ensure_tool_mention("Pneumonia is likely.", na).endswith(na["message"]))
+check("guarantee: existing mention is not duplicated",
+      main._ensure_tool_mention("Likely pneumonia. The nuclei analysis tool doesn't apply to X-rays.", na).count("\n") == 0)
+check("guarantee: missing measurements are appended", "48 nuclei" in main._ensure_tool_mention("Benign glands.", okr))
+check("guarantee: no tool requested, answer untouched", main._ensure_tool_mention("Text.", None) == "Text.")
 blank = io.BytesIO(); Image.new("RGB", (512, 512), (230, 190, 210)).save(blank, format="PNG"); blank = blank.getvalue()
 TILE_PATH = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else ""
 tile = open(TILE_PATH, "rb").read() if TILE_PATH else blank

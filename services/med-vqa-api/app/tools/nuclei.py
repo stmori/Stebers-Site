@@ -55,10 +55,15 @@ class NucleiTool:
         base = img.convert("RGB"); base.thumbnail((max_side, max_side))
         lab = np.asarray(Image.fromarray(labels.astype(np.int32)).resize(base.size, Image.NEAREST))
         rng = np.random.default_rng(7)
-        palette = rng.integers(70, 256, size=(int(lab.max()) + 1, 3)).astype(np.float32)
+        palette = rng.integers(90, 256, size=(int(lab.max()) + 1, 3)).astype(np.float32)
         arr = np.asarray(base).astype(np.float32)
         m = lab > 0
-        arr[m] = 0.5 * arr[m] + 0.5 * palette[lab[m]]
+        arr[m] = 0.65 * arr[m] + 0.35 * palette[lab[m]]                       # light colored fill
+        edge = np.zeros_like(m)                                              # 2-px outline where the label changes
+        edge[1:, :] |= lab[1:, :] != lab[:-1, :]; edge[:-1, :] |= lab[:-1, :] != lab[1:, :]
+        edge[:, 1:] |= lab[:, 1:] != lab[:, :-1]; edge[:, :-1] |= lab[:, :-1] != lab[:, 1:]
+        edge &= m | np.roll(m, 1, 0) | np.roll(m, 1, 1)
+        arr[edge] = (255, 236, 64)                                           # bright yellow outlines
         buf = io.BytesIO()
         Image.fromarray(arr.astype(np.uint8)).save(buf, format="JPEG", quality=85)
         return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
