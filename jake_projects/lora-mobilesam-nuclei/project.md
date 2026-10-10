@@ -28,8 +28,12 @@ tech: [Python, PyTorch, MobileSAM, TinyViT, LoRA, PEFT, scikit-image, ONNX Runti
 links:
   - {label: "Source", url: "https://github.com/Jeber811/Fine-Tuning-MobileSAM-with-LoRA-for-Nuclei-Instance-Segmentation"}
   - {label: "Try it in Med-VQA", url: "/projects/med-vqa/"}
-cover: ""
-gallery: []
+cover: media/architecture.jpg
+gallery:
+  - {src: media/architecture.jpg, alt: "Diagram: frozen MobileSAM encoder, decoder and prompt encoder, with LoRA down/up-projection matrices added to an attention layer",
+     caption: "Architecture: LoRA adapters inside MobileSAM's frozen TinyViT encoder"}
+  - {src: media/report-fold1-example.jpg, alt: "H&E tile, ground-truth nuclei instances, and LoRA predictions side by side",
+     caption: "Original H&E tile, ground-truth nuclei, and LoRA prediction (from the course report)"}
 youtube: []
 documents:
   - {label: "Report (PDF)", url: "https://github.com/Jeber811/Fine-Tuning-MobileSAM-with-LoRA-for-Nuclei-Instance-Segmentation/blob/main/Report.pdf"}

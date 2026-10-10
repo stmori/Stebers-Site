@@ -17,13 +17,13 @@ highlights:
   - "Designed and compared four diffusion-based generative models for H&E-to-IHC virtual staining on the BCI-512 benchmark, which could replace a separate physical staining step for HER2 scoring"
   - "Introduced three novel components: a Topological Consistency Loss (soft Euler characteristic), Spatial-Transformer-in-the-loop correction for slide misalignment, and dual-stream SAM conditioning for a Diffusion Transformer"
   - "Cut FID by ~40% (360.96 → 214.77) with the misalignment-correcting PST-Diff+STN model versus the Brownian Bridge (BBDM) baseline, and reached the best perceptual quality (LPIPS 0.664)"
-  - "Trained all models on NVIDIA A100 GPUs in a Slurm HPC environment with mixed precision, under a standardized 2-hour training budget per model for a fair comparison"
+  - "Trained all models on NVIDIA A100-80GB GPUs with bfloat16 mixed precision under a standardized 2-hour wall-clock budget per model, for a fair comparison across architectures"
 metrics:
   - {value: "~40%", label: "lower FID vs baseline"}
   - {value: "4", label: "diffusion architectures compared"}
   - {value: "3", label: "novel model components"}
-  - {value: "A100", label: "GPU training (Slurm HPC)"}
-tech: [Python, PyTorch, Diffusion Models, Diffusion Transformers, Brownian Bridge Diffusion, Spatial Transformer Networks, SAM, Mixed Precision, Slurm, NVIDIA A100]
+  - {value: "A100", label: "80GB GPU training (bf16)"}
+tech: [Python, PyTorch, Diffusion Models, Diffusion Transformers, Brownian Bridge Diffusion, Spatial Transformer Networks, SAM, bfloat16 Mixed Precision, NVIDIA A100, Google Colab Pro, pytorch-fid]
 links:
   - {label: "Source", url: "https://github.com/Jeber811/Diffusion_Model_Virtual_Staining"}
 cover: ""
@@ -39,7 +39,7 @@ Pathologists stain breast-cancer tissue twice: once with routine **H&E**, and ag
 
 ## What I built
 
-Four diffusion models, each trained under the same 2-hour NVIDIA A100 budget:
+Four diffusion models, each trained with bfloat16 mixed precision under the same 2-hour wall-clock budget on an NVIDIA A100-80GB (Google Colab Pro):
 
 | Model | Idea | Params |
 |---|---|---|
