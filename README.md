@@ -12,6 +12,8 @@ web/                            # frontend (Next.js)                            
 services/
 ├── med-vqa-api/                # FastAPI + ChromaDB retrieval, index scripts         — Jake
 └── med-vqa-inference/          # vision model on the CRCV cluster (bare-metal)       — Jake
+jake_projects/                  # Jake's portfolio content: profile + one folder per project
+                                #   (project.md front matter + media/); see jake_projects/README.md — Jake
 deploy/
 ├── docker-compose.yml          # web + every API on one network                      — shared
 ├── Caddyfile                   # /  → website,  /api/med-vqa/*  → med-vqa-api
@@ -19,7 +21,7 @@ deploy/
 ```
 
 - **Evanton** owns `web/`, hosting and the domain.
-- **Jake** owns `services/med-vqa-*`.
+- **Jake** owns `services/med-vqa-*` and `jake_projects/` (portfolio content; `web/` decides how it looks).
 - `deploy/` is shared: change it in a PR and tag the other person.
 
 Med-VQA appears on Jake's portfolio card and on its own page, `/projects/med-vqa/`. That page calls the API at `/api/med-vqa/...`; the contract is in `services/med-vqa-api/README.md`. A new project gets a page in `web/app/projects/<name>/` and, if it has a backend, a folder in `services/` plus a route in `deploy/Caddyfile`.
