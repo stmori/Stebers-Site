@@ -25,11 +25,11 @@ git push -u origin jake/short-topic            # 4. push the branch
 
 | PR changes files in... | Who merges |
 |---|---|
-| only `projects/med-vqa/` | Jake (or Jake's Claude Code session) may merge it once its tests pass. Evanton is still welcome to comment. |
-| `site/` | Jake reviews; Evanton merges. |
-| anything at the root (`README.md`, `CONTRIBUTING.md`, `.gitignore`, ...) or more than one area | The other person reviews and merges. |
+| only `services/med-vqa-*` | Jake (or Jake's Claude Code session) may merge it once its tests pass. Evanton is still welcome to comment. |
+| only `web/` | Jake reviews; Evanton merges. |
+| `deploy/`, anything at the root (`README.md`, `CONTRIBUTING.md`, `.gitignore`, ...), or more than one area | The other person reviews and merges. |
 
-Jake works with Claude Code, which opens PRs from Jake's account (Jeber811). It follows the same rules: it never pushes to `main`, uses `jake/<topic>` branches, and only merges PRs that change `projects/med-vqa/` alone.
+Jake works with Claude Code, which opens PRs from Jake's account (Jeber811). It follows the same rules: it never pushes to `main`, uses `jake/<topic>` branches, and only merges PRs that change `services/med-vqa-*` alone.
 
 ## If main moved while you were working
 
