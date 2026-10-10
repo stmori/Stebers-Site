@@ -36,14 +36,21 @@ def ask(img_bytes, fnd, on=True):
 
 c = TestClient(main.app)
 
-# the answer must always say whether the requested tool ran
-na = {"status": "not_applicable", "message": "Nuclei analysis only works on H&E-stained histology images; this looks like an X-ray."}
+# the answer must always say whether the requested tool ran, exactly once, in one standard line at the end
+na = {"status": "not_applicable", "message": "The nuclei analysis tool only works on H&E-stained histology slides, so it wasn't run on this chest X-ray."}
 okr = {"status": "ok", "count": 48, "message": "Found 48 nuclei covering 15.1% of the tile."}
-check("guarantee: missing 'not applicable' note is appended", main._ensure_tool_mention("Pneumonia is likely.", na).endswith(na["message"]))
-check("guarantee: existing mention is not duplicated",
-      main._ensure_tool_mention("Likely pneumonia. The nuclei analysis tool doesn't apply to X-rays.", na).count("\n") == 0)
-check("guarantee: missing measurements are appended", "48 nuclei" in main._ensure_tool_mention("Benign glands.", okr))
-check("guarantee: no tool requested, answer untouched", main._ensure_tool_mention("Text.", None) == "Text.")
+fin = main._finish_answer
+check("tool line: 'not applicable' note appended", fin("Pneumonia is likely.", na) == "Pneumonia is likely.\n\nNuclei analysis: " + na["message"])
+check("tool line: model's own tool sentence replaced, not duplicated",
+      fin("Likely pneumonia. The nuclei analysis tool doesn't apply to X-rays.", na).count("nuclei analysis tool") == 1)
+r_ok = fin("Benign glands [1]. The nuclei segmentation model counted 48 nuclei. Size varies a lot, which fits atypia.", okr)
+check("tool line: measurements appended once", r_ok.count("48 nuclei") == 1 and r_ok.endswith(okr["message"])
+      and "Size varies a lot" in r_ok and "[1]" in r_ok, r_ok)
+check("no tool requested: answer untouched", fin("Text [1].", None) == "Text [1].")
+check("passage meta-comments dropped", fin("Likely pneumonia [1]. None of the reference passages cover this.", None) == "Likely pneumonia [1].")
+check("'reference material' meta-comment dropped",
+      fin("Adenocarcinoma is likely. This is discussed in the reference material on glandular cancers [5].", None) == "Adenocarcinoma is likely.")
+check("ordinary medical wording kept", fin("Mucus blocks the nasal passages. Pneumonia fills air sacs.", None).count(".") == 2)
 blank = io.BytesIO(); Image.new("RGB", (512, 512), (230, 190, 210)).save(blank, format="PNG"); blank = blank.getvalue()
 TILE_PATH = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else ""
 tile = open(TILE_PATH, "rb").read() if TILE_PATH else blank

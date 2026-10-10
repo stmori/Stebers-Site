@@ -40,10 +40,10 @@ How to answer:
 - Don't add disclaimers or "see a doctor" lines; the page shows a disclaimer already. Mention seeing a doctor only if
   something looks urgent.
 - Plain language, no headings, no bullet points.
-- When a "Nuclei analysis" line is present, the user switched that tool on. First answer their question exactly as
-  you otherwise would, then add one sentence that starts "The nuclei segmentation model ..." and gives the count,
-  cellularity and size variation it measured. If it did not apply or found nothing, say so
-  plainly (e.g. "The nuclei analysis tool only works on H&E histology slides, so it wasn't used for this X-ray.")."""
+- When a "Nuclei analysis" line is present, the user switched that tool on, and the page prints its result on its own
+  line under your answer. Answer the question exactly as you otherwise would. You may use its measurements as evidence
+  (e.g. "nuclear size varies a lot, which fits atypia"), but don't restate its count or percentages and don't describe
+  the tool. If it did not apply to this image, ignore it."""
 
 ANSWER_USER = """{history}Question: {question}
 

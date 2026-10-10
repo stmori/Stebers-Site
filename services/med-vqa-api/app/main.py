@@ -93,18 +93,37 @@ def _cache_put(key, response):
         _cache.popitem(last=False)
 
 
-def _ensure_tool_mention(text, nuclei):
-    """The answer must say whether the requested nuclei tool ran. If the model left it out, append the tool's own sentence."""
+_SENTENCE = re.compile(r"(?<=[.!?])\s+")
+_META = re.compile(r"\b(?:reference|provided|given|retrieved|these|those|the) passages?\b"
+                   r"|\breference material\b|\bnone of the (?:references|sources)\b"
+                   r"|\b(?:provided|given) (?:references|sources)\b", re.I)
+_TOOL_TALK = re.compile(r"\bnucle\w* (?:analysis|segmentation|tool|model)\b|\bsegmentation (?:tool|model)\b", re.I)
+
+
+def _drop_sentences(text, bad):
+    """Remove sentences matching `bad`, paragraph by paragraph. Keeps the text if everything would be removed."""
+    paras = []
+    for para in text.split("\n"):
+        kept = [s for s in _SENTENCE.split(para) if not bad(s)]
+        if kept or not para.strip():
+            paras.append(" ".join(kept))
+    out = re.sub(r"\n{3,}", "\n\n", "\n".join(paras)).strip()
+    return out or text
+
+
+def _finish_answer(text, nuclei):
+    """Post-process the model's answer.
+
+    Drops sentences that talk about the reference passages (the prompt forbids it, but a small model sometimes does
+    it anyway). If the nuclei tool was requested, the tool's result is reported by one standard line at the end, so
+    any sentence in which the model restated the tool output is dropped to avoid saying it twice.
+    """
+    text = _drop_sentences(text, _META.search)
     if not nuclei:
         return text
-    t = text.lower()
-    if nuclei["status"] == "ok":
-        if str(nuclei.get("count")) in text and "nucle" in t:
-            return text
-        return f'{text}\n\nA nuclei segmentation model {nuclei["message"][0].lower()}{nuclei["message"][1:]}'
-    if "nucle" in t and any(w in t for w in ("analysis", "segmentation", "tool")):
-        return text
-    return f'{text}\n\n{nuclei["message"]}'
+    text = _drop_sentences(text, _TOOL_TALK.search)
+    label = "Nuclei analysis (LoRA MobileSAM)" if nuclei["status"] == "ok" else "Nuclei analysis"
+    return f'{text}\n\n{label}: {nuclei["message"]}'
 
 
 def _split_merged_citations(text, n_sources):
@@ -214,7 +233,7 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
         return _error(502, "The AI model is unavailable right now. Try again in a minute.")
     t3 = time.time()
 
-    text = _ensure_tool_mention(_split_merged_citations(text, len(hits)), nuclei)
+    text = _finish_answer(_split_merged_citations(text, len(hits)), nuclei)
     cited = {int(n) for n in re.findall(r"\[(\d+)\]", text)}
     citations = [dict(n=i, title=h["title"], url=h["url"], source=h["source"], snippet=h["text"][:400],
                       score=h["score"], cited=i in cited) for i, h in enumerate(hits, 1)]
