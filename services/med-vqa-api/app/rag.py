@@ -23,13 +23,42 @@ class Retriever:
     def count(self):
         return self.collection.count()
 
+    def _ranked(self, queries, k):
+        vecs = [v.tolist() for v in self.embedder.embed([self.info["query_prefix"] + q for q in queries])]
+        r = self.collection.query(query_embeddings=vecs, n_results=k, include=["documents", "metadatas", "distances"])
+        out = []
+        for docs, metas, dists in zip(r["documents"], r["metadatas"], r["distances"]):
+            out.append([dict(title=m.get("title", ""), url=m.get("url", ""), source=m.get("source", ""),
+                             text=d.split("\n", 1)[1] if "\n" in d else d, score=round(1 - s, 3))
+                        for d, m, s in zip(docs, metas, dists)])
+        return out
+
     def search(self, text, k=config.TOP_K):
-        vec = next(iter(self.embedder.embed([self.info["query_prefix"] + text]))).tolist()
-        r = self.collection.query(query_embeddings=[vec], n_results=k,
-                                  include=["documents", "metadatas", "distances"])
-        hits = []
-        for doc, meta, dist in zip(r["documents"][0], r["metadatas"][0], r["distances"][0]):
-            answer = doc.split("\n", 1)[1] if "\n" in doc else doc
-            hits.append(dict(title=meta.get("title", ""), url=meta.get("url", ""),
-                             source=meta.get("source", ""), text=answer, score=round(1 - dist, 3)))
-        return hits
+        return self._ranked([text], k)[0]
+
+    def search_many(self, queries, k=config.TOP_K, per_query=4, min_score=config.MIN_SCORE, max_per_url=2):
+        """Search each query separately and interleave the results, so every search term is represented.
+
+        Skips duplicates, matches below min_score (but always returns at least 3 passages), and more than
+        max_per_url passages from the same source page.
+        """
+        queries = [q for q in dict.fromkeys(q.strip() for q in queries) if q][:6]
+        lists = self._ranked(queries, per_query)
+        picked, titles, per_url = [], set(), {}
+
+        def take(hit, floor):
+            if hit["title"] in titles or hit["score"] < floor or per_url.get(hit["url"], 0) >= max_per_url:
+                return False
+            picked.append(hit); titles.add(hit["title"]); per_url[hit["url"]] = per_url.get(hit["url"], 0) + 1
+            return True
+
+        for floor in (min_score, -1.0):                 # second pass only if too few strong matches
+            for rank in range(per_query):
+                for lst in lists:
+                    if len(picked) >= k or (floor < 0 and len(picked) >= 3):
+                        break
+                    if rank < len(lst):
+                        take(lst[rank], floor)
+            if len(picked) >= 3:
+                break
+        return picked

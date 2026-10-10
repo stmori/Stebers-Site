@@ -6,7 +6,10 @@ Reply with a single JSON object and nothing else, using exactly these keys:
   "modality": "e.g. Chest X-ray (PA), Axial CT of the abdomen, Brain MRI (T2), Histology (H&E), or Unknown",
   "body_region": "e.g. Chest, Abdomen, Brain, Skin, Tissue sample",
   "observations": ["up to 5 short, specific visual findings, normal or abnormal"],
-  "short_answer": "a direct answer to the user's question in at most 2 sentences, hedged appropriately"
+  "short_answer": "a direct answer to the user's question in at most 2 sentences, hedged appropriately",
+  "search_terms": ["2 to 4 short names of conditions or topics a patient-education encyclopedia would have a page for,
+                    most relevant first, e.g. \"pneumonia\", \"pleural effusion\", \"cardiomegaly\"; use \"normal chest x-ray\" style
+                    terms when nothing looks abnormal"]
 }"""
 
 VISION_USER = "Question about this image: {question}"

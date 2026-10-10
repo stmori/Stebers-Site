@@ -18,8 +18,9 @@ FINDINGS_SCHEMA = {
         "body_region": {"type": "string"},
         "observations": {"type": "array", "items": {"type": "string"}},
         "short_answer": {"type": "string"},
+        "search_terms": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["is_medical_image", "modality", "body_region", "observations", "short_answer"],
+    "required": ["is_medical_image", "modality", "body_region", "observations", "short_answer", "search_terms"],
     "additionalProperties": False,
 }
 

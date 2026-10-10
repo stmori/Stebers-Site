@@ -24,7 +24,8 @@ MOCK_LLM = _env("MOCK_LLM", "0") == "1"             # canned model output, real 
 
 INDEX_DIR = _env("INDEX_DIR", "/index")
 FASTEMBED_CACHE = _env("FASTEMBED_CACHE", "/models")
-TOP_K = int(_env("TOP_K", "5"))
+TOP_K = int(_env("TOP_K", "5"))                     # passages given to the answer model
+MIN_SCORE = float(_env("MIN_SCORE", "0.6"))         # drop weaker matches (cosine similarity), but always keep 3
 
 MAX_IMAGE_MB = float(_env("MAX_IMAGE_MB", "8"))
 MAX_SIDE_PX = int(_env("MAX_SIDE_PX", "1024"))

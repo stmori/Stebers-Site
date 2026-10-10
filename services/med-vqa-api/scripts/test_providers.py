@@ -21,7 +21,8 @@ from app import main  # noqa: E402
 from app.providers import claude  # noqa: E402
 
 FINDINGS = {"is_medical_image": True, "modality": "Chest X-ray (PA)", "body_region": "Chest",
-            "observations": ["Right upper lobe consolidation"], "short_answer": "Possibly pneumonia."}
+            "observations": ["Right upper lobe consolidation"], "short_answer": "Possibly pneumonia.",
+            "search_terms": ["pneumonia", "pleural effusion"]}
 ANSWER = "The image appears to show consolidation, which can be caused by pneumonia [1]. See a clinician."
 
 
@@ -72,6 +73,10 @@ check("happy path 200", r.status_code == 200, body)
 check("findings parsed from JSON", body.get("findings", {}).get("observations") == FINDINGS["observations"])
 check("answer text read past thinking block", body.get("answer") == ANSWER)
 check("citation [1] marked cited", body["citations"][0]["cited"] is True)
+check("search terms returned in findings", body["findings"]["search_terms"] == ["pneumonia", "pleural effusion"])
+check("search terms drive retrieval (a pneumonia page is retrieved)",
+      any("pneumonia" in c["title"].lower() for c in body["citations"]), [c["title"] for c in body["citations"]])
+check("schema requires search_terms", "search_terms" in claude.FINDINGS_SCHEMA["required"])
 v, a = fake.calls
 check("model + max_tokens sent", v["model"] == "claude-haiku-5-5" and v["max_tokens"] == 2048)
 check("no sampling params (Haiku 5.5 rejects them)", not ({"temperature", "top_p", "top_k"} & set(v) | {"temperature", "top_p", "top_k"} & set(a)))
