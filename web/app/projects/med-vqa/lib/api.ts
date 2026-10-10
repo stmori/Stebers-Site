@@ -5,6 +5,9 @@ import type { AskResponse } from "./types";
 const API = (process.env.NEXT_PUBLIC_MEDVQA_API || "/api/med-vqa").replace(/\/$/, "");
 const MOCK = process.env.NEXT_PUBLIC_MOCK === "1";
 
+/** Where the example images live under web/public. */
+export const EXAMPLES_DIR = "/projects/med-vqa";
+
 export const MAX_IMAGE_MB = 8;
 export const MAX_QUESTION_CHARS = 500;
 export const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];

@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import ChatThread from "./components/ChatThread";
 import Composer from "./components/Composer";
-import { EXAMPLES } from "./examples";
-import { ACCEPTED_TYPES, ask, AskError, validate } from "./lib/api";
+import { ACCEPTED_TYPES, ask, AskError, EXAMPLES_DIR, validate } from "./lib/api";
+import examples from "./lib/examples.json";
 import type { ChatMessage, Example } from "./lib/types";
 import { useWindowFileDrop } from "./lib/useWindowFileDrop";
 
+const EXAMPLES = examples as Example[];
 const uid = () => Math.random().toString(36).slice(2, 10);
 
 interface Img {
@@ -114,8 +115,8 @@ export default function MedVqaPage() {
     async (ex: Example) => {
       if (busy) return;
       try {
-        const blob = await (await fetch(ex.src)).blob();
-        const img = toImg(new File([blob], ex.file, { type: blob.type || "image/jpeg" }));
+        const blob = await (await fetch(`${EXAMPLES_DIR}/${ex.file}`)).blob();
+        const img = toImg(new File([blob], ex.file.split("/").pop() || "example.jpg", { type: blob.type || "image/jpeg" }));
         setHint(null);
         run(img, ex.question, true, false);
         setCarried(img);
@@ -174,7 +175,7 @@ export default function MedVqaPage() {
                     className="grid gap-2 rounded-xl border border-rule bg-surface p-2 text-xs hover:border-accent"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={ex.src} alt="" className="aspect-square w-full rounded-lg object-cover" />
+                    <img src={`${EXAMPLES_DIR}/${ex.file}`} alt="" className="aspect-square w-full rounded-lg object-cover" />
                     <span className="line-clamp-2 text-muted">{ex.question}</span>
                   </button>
                 ))}

@@ -28,8 +28,7 @@ export interface AskResponse {
 }
 
 export interface Example {
-  file: string; // file name in ../examples/
-  src: string; // bundled URL of the image
+  file: string;
   label: string;
   question: string;
   source: string;
