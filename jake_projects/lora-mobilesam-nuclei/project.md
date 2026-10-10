@@ -16,12 +16,12 @@ summary: >-
   nuclei-analysis tool.
 highlights:
   - "Engineered a parameter-efficient fine-tuning (PEFT) pipeline that injects rank-4 LoRA adapters into MobileSAM's TinyViT attention layers, training only 29,696 parameters (~0.3% of the model) for edge-friendly inference"
-  - "Reached 0.72 Dice/F1 and 0.59 Aggregated Jaccard Index on held-out NuInsSeg tiles (31 human and mouse organs) with prompt-free inference: one forward pass and connected components, no clicks or boxes"
-  - "Evaluated with 5-fold cross-validation using pathology-standard instance metrics (Dice, AJI, Panoptic Quality) with Hungarian matching; a longer 30-epoch retrain raised AJI from 0.47 to 0.59 on the same validation fold"
+  - "Reached 0.72 Dice, 0.40 AJI and 0.32 Panoptic Quality on 133 held-out NuInsSeg tiles (31 human and mouse organs) with prompt-free inference: one forward pass, thresholding and a watershed split of touching nuclei"
+  - "Audited the evaluation: the original AJI implementation subtracted matched pixels twice (inflating scores, sometimes above 1), so all results were re-measured with the standard AJI and PQ definitions"
   - "Merged the LoRA weights back into the base model and exported it to ONNX for CPU inference, so it now runs as the optional nuclei-analysis tool inside Med-VQA"
 metrics:
-  - {value: "0.72", label: "Dice / F1"}
-  - {value: "0.59", label: "AJI (instance)"}
+  - {value: "0.72", label: "Dice"}
+  - {value: "0.40", label: "AJI (standard)"}
   - {value: "29.7k", label: "trainable parameters (~0.3%)"}
   - {value: "rank 4", label: "LoRA adapters"}
 tech: [Python, PyTorch, MobileSAM, TinyViT, LoRA, PEFT, scikit-image, ONNX Runtime, NuInsSeg]
@@ -48,22 +48,26 @@ Counting and outlining cell nuclei in H&E-stained tissue is a basic step in comp
 ## Approach
 
 - **LoRA on the image encoder.** Every attention `qkv` projection in TinyViT is wrapped with a rank-4 low-rank adapter (α = 8), and all original weights stay frozen. Only **29,696 parameters** are trained, about 0.3% of MobileSAM.
-- **Prompt-free decoding.** The mask decoder gets an empty prompt and predicts a nuclei probability map for the whole tile in a single pass. Thresholding plus connected components turns it into individual nucleus instances.
+- **Prompt-free decoding.** The mask decoder gets an empty prompt and predicts a nuclei probability map for the whole tile in a single pass. Thresholding plus connected components turns it into nucleus instances; in the deployed version a distance-transform watershed then splits touching nuclei.
 - **Training.** NuInsSeg (665 H&E tiles from 31 human and mouse organs) at 1024×1024, BCE loss, AdamW (learning rate 1e-4), batch 2, 5-fold cross-validation (10 epochs per fold in the course report).
-- **Evaluation.** Pixel IoU and F1, plus the instance-level metrics used in pathology: Dice, Aggregated Jaccard Index (AJI) and Panoptic Quality (PQ), with Hungarian matching between predicted and ground-truth nuclei.
+- **Evaluation.** Dice for pixel accuracy, plus the instance-level metrics used in pathology: Aggregated Jaccard Index (AJI) and Panoptic Quality (PQ), which reward separating each nucleus correctly.
 
 ## Results
 
-The course report trained 10 epochs per fold and averaged **Dice 0.61, AJI 0.42, PQ 0.14** over 5 folds, with the loss still falling. So I retrained on fold 1 for **30 epochs** with everything else unchanged and measured the same 133 held-out tiles:
+The course report trained 10 epochs per fold (5-fold mean Dice 0.61) with the loss still falling. I retrained on fold 1 for **30 epochs** with everything else unchanged and measured the same 133 held-out tiles through the deployed ONNX pipeline, using the standard AJI (Kumar et al., 2017) and PQ (Kirillov et al., 2019) definitions:
 
-| Fold 1 (133 validation tiles) | Dice / F1 | Pixel IoU | AJI | PQ |
-|---|---|---|---|---|
-| Report, 10 epochs | 0.665 | – | 0.466 | 0.165 |
-| Retrain, 10 epochs | 0.674 | 0.529 | 0.438 | 0.172 |
-| **Retrain, 30 epochs (deployed)** | **0.720** | **0.585** | **0.595** | **0.186** |
+| Fold 1 (133 held-out tiles) | Dice | AJI | PQ |
+|---|---|---|---|
+| 10 epochs (course setup) | 0.673 | 0.300 | 0.246 |
+| 30 epochs | 0.720 | 0.283 | 0.267 |
+| **30 epochs + watershed split (deployed)** | **0.720** | **0.404** | **0.320** |
 
-The biggest gain is in AJI, which means nuclei are separated into the right instances more often instead of merged blobs. PQ is still low because touching nuclei often merge after thresholding. A watershed or distance-map head is the next step.
+Longer training improves pixel accuracy. Splitting touching nuclei is what improves the instance metrics, and it fixes the count: the median ratio of predicted to true nuclei per tile went from 0.75 to 1.04.
+
+**A note on the metrics.** While re-evaluating, I found that the AJI formula in the original course script subtracts the matched intersection twice, which inflates AJI (it can even exceed 1). The report's AJI figures therefore aren't comparable to published results; the table above uses the standard definitions.
 
 ## In production: Med-VQA nuclei analysis
 
-I merged the 30-epoch LoRA weights back into the base model (`W' = W + (A·B)·α/r`), so it runs as a plain MobileSAM, and exported it to **ONNX** (52 MB, ~1.2 s per tile on CPU, identical masks to PyTorch) for the Med-VQA server. With the *nuclei analysis* toggle on, an H&E histology image gets a nuclei count, density, size variation and a colored overlay. The answer model uses those measurements, and for non-histology images it says the tool doesn't apply.
+I merged the 30-epoch LoRA weights back into the base model (`W' = W + (A·B)·α/r`), so it runs as a plain MobileSAM, and exported it to **ONNX** (52 MB, ~1–2 s per image on CPU, identical masks to PyTorch) for the Med-VQA server. With the *nuclei analysis* toggle on, an H&E histology image gets an approximate nuclei count, its cellularity (sparse, moderate or dense; the cut-offs are the ground-truth tertiles) and an overlay with every detected nucleus outlined. The answer model uses those measurements as evidence, and for non-histology images the answer says the tool doesn't apply.
+
+Nuclear size variation is deliberately **not** reported. On held-out tiles the model's spread of nucleus sizes didn't correlate with the ground truth's, so it would have been a misleading sign of atypia. Cellularity does track the ground truth (r = 0.87).
