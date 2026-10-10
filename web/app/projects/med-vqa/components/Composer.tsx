@@ -20,13 +20,28 @@ interface Props {
   onFiles: (files: File[]) => void;
   onRemove: () => void;
   hint: string | null;
+  /** Optional nuclei analysis (LoRA MobileSAM), only meaningful for H&E histology images. */
+  nuclei: boolean;
+  onNucleiChange: (on: boolean) => void;
 }
 
 /**
  * The chat entry box: attachments in the top-left, the text field in the middle,
  * attach button bottom-left and send button bottom-right.
  */
-export default function Composer({ value, onChange, onSubmit, busy, attachment, carried, onFiles, onRemove, hint }: Props) {
+export default function Composer({
+  value,
+  onChange,
+  onSubmit,
+  busy,
+  attachment,
+  carried,
+  onFiles,
+  onRemove,
+  hint,
+  nuclei,
+  onNucleiChange,
+}: Props) {
   const text = useRef<HTMLTextAreaElement>(null);
   const picker = useRef<HTMLInputElement>(null);
 
@@ -128,6 +143,25 @@ export default function Composer({ value, onChange, onSubmit, busy, attachment, 
                 strokeLinejoin="round"
               />
             </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => onNucleiChange(!nuclei)}
+            disabled={busy}
+            aria-pressed={nuclei}
+            title="Nuclei analysis: counts and outlines cell nuclei with a LoRA-fine-tuned MobileSAM model. Works on H&E-stained histology images only."
+            className={`flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-2 text-xs font-medium disabled:opacity-50 ${
+              nuclei ? "bg-accent-soft text-accent" : "text-muted hover:bg-raised hover:text-ink"
+            }`}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="8" cy="9" r="3" />
+              <circle cx="16" cy="8" r="2.2" />
+              <circle cx="14.5" cy="16" r="3.2" />
+              <circle cx="7" cy="17" r="1.6" />
+            </svg>
+            Nuclei{nuclei ? " on" : ""}
+            <span className="hidden text-[10px] font-normal opacity-70 sm:inline">· H&amp;E only</span>
           </button>
           <span className={`truncate text-xs ${hint ? "text-err" : "text-muted"}`} role={hint ? "alert" : undefined}>
             {hint ?? (value.length > MAX_QUESTION_CHARS - 50 ? `${MAX_QUESTION_CHARS - value.length} characters left` : "")}

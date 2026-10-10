@@ -30,6 +30,7 @@ export async function ask(
   question: string,
   signal?: AbortSignal,
   history: HistoryTurn[] = [],
+  options: { nuclei?: boolean } = {},
 ): Promise<AskResponse> {
   if (MOCK) return mockAsk(question, signal);
 
@@ -37,6 +38,7 @@ export async function ask(
   body.append("image", image);
   body.append("question", question.trim());
   if (history.length) body.append("history", JSON.stringify(history));
+  if (options.nuclei) body.append("analyze_nuclei", "true");
 
   let res: Response;
   try {
