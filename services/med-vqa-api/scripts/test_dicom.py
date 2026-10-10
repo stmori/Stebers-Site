@@ -42,7 +42,7 @@ r = c.post("/api/ask", files={"image": ("scan.dcm", open(get_testdata_file("CT_s
 check("API accepts a .dcm upload (mock mode)", r.status_code == 200, r.text[:200])
 uri_holder = {}
 orig = main.llm.look
-main.llm.look = lambda uri, q: (uri_holder.setdefault("uri", uri), orig(uri, q))[1]
+main.llm.look = lambda uri, q, *rest: (uri_holder.setdefault("uri", uri), orig(uri, q, *rest))[1]
 main._cache.clear()
 c.post("/api/ask", files={"image": ("p.dcm", synthetic("MONOCHROME2"), "application/dicom")}, data={"question": "What is visible?"})
 sent = uri_holder.get("uri", "")

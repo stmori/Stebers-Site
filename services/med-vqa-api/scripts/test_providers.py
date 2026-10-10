@@ -19,6 +19,7 @@ from PIL import Image  # noqa: E402
 
 from app import main  # noqa: E402
 from app.providers import claude  # noqa: E402
+from app import prompts as prompts_mod  # noqa: E402
 
 FINDINGS = {"is_medical_image": True, "modality": "Chest X-ray (PA)", "body_region": "Chest",
             "observations": ["Right upper lobe consolidation"], "short_answer": "Possibly pneumonia.",
@@ -107,6 +108,29 @@ fake3 = FakeMessages([("end_turn", json.dumps(FINDINGS)), ("end_turn", ANSWER)])
 claude._client = NS(messages=fake3)
 r = c.post("/api/ask", files={"image": ("x.png", png_bytes(), "image/png")}, data={"question": "Is the heart enlarged?"})
 check("cache: a different question calls the model again", r.json().get("cached") is False and len(fake3.calls) == 2, r.text)
+main._cache.clear()
+
+# --- conversation history reaches both model calls; bad history is ignored; cache is per-conversation
+hist = [{"question": "What abnormality is visible?", "answer": "It appears to be right upper lobe pneumonia [1]."}]
+fake4 = FakeMessages([("end_turn", json.dumps(FINDINGS)), ("end_turn", ANSWER)])
+claude._client = NS(messages=fake4)
+main._cache.clear()
+r = c.post("/api/ask", files={"image": ("x.png", png_bytes(), "image/png")},
+           data={"question": "What would cause that?", "history": json.dumps(hist)})
+vis_text = fake4.calls[0]["messages"][0]["content"][1]["text"]
+ans_text = fake4.calls[1]["messages"][0]["content"]
+check("history: follow-up answered", r.status_code == 200, r.text)
+check("history: vision call sees the earlier turn", "Earlier in this conversation" in vis_text and "right upper lobe" in vis_text)
+check("history: answer call sees the earlier turn", "Earlier in this conversation" in ans_text and "right upper lobe" in ans_text)
+fake5 = FakeMessages([("end_turn", json.dumps(FINDINGS)), ("end_turn", ANSWER)])
+claude._client = NS(messages=fake5)
+r = c.post("/api/ask", files={"image": ("x.png", png_bytes(), "image/png")},
+           data={"question": "What would cause that?", "history": "not json"})
+check("history: invalid history ignored, not cached under the real conversation",
+      r.status_code == 200 and r.json()["cached"] is False and "Earlier" not in fake5.calls[0]["messages"][0]["content"][1]["text"])
+check("answer prompt forbids pipeline talk", "Never mention" in prompts_mod.ANSWER_SYSTEM)
+check("merged citation [12] is split into [1][2] when there are 5 sources",
+      main._split_merged_citations("Pneumonia is an infection [12]. See [5].", 5) == "Pneumonia is an infection [1][2]. See [5].")
 main._cache.clear()
 
 # --- refusal and truncation

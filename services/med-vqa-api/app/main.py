@@ -3,6 +3,7 @@ import base64
 import copy
 import hashlib
 import io
+import json
 import logging
 import re
 import time
@@ -52,9 +53,23 @@ def _rate_limited(ip):
 _cache = OrderedDict()
 
 
-def _cache_key(data: bytes, question: str):
+def _cache_key(data: bytes, question: str, history=None):
     q = re.sub(r"\s+", " ", question.lower()).strip()
-    return hashlib.sha256(data + b"\0" + q.encode() + b"\0" + config.MODEL.encode()).hexdigest()
+    h = json.dumps(history or [], sort_keys=True)
+    return hashlib.sha256(data + b"\0" + q.encode() + b"\0" + h.encode() + b"\0" + config.MODEL.encode()).hexdigest()
+
+
+def _parse_history(raw: str):
+    """Optional earlier turns about the same image: JSON [{"question": ..., "answer": ...}, ...]. Bad input is ignored."""
+    try:
+        items = json.loads(raw) if raw else []
+    except ValueError:
+        return []
+    if not isinstance(items, list):
+        return []
+    turns = [dict(question=str(t.get("question", ""))[:300], answer=str(t.get("answer", ""))[:800])
+             for t in items if isinstance(t, dict) and t.get("question") and t.get("answer")]
+    return turns[-3:]
 
 
 def _cache_get(key):
@@ -73,6 +88,16 @@ def _cache_put(key, response):
     _cache.move_to_end(key)
     while len(_cache) > config.CACHE_SIZE:
         _cache.popitem(last=False)
+
+
+def _split_merged_citations(text, n_sources):
+    """Fix citations the model glued together, e.g. "[12]" with 5 sources becomes "[1][2]"."""
+    def fix(m):
+        num = m.group(1)
+        if int(num) <= n_sources or not all("1" <= d <= str(n_sources) for d in num):
+            return m.group(0)
+        return "".join(f"[{d}]" for d in num)
+    return re.sub(r"\[(\d{2,})\]", fix, text) if 0 < n_sources < 10 else text
 
 
 def _is_chest_xray(findings):
@@ -113,12 +138,13 @@ def health():
 
 
 @app.post("/api/ask")
-def ask(request: Request, image: UploadFile = File(...), question: str = Form(...)):
+def ask(request: Request, image: UploadFile = File(...), question: str = Form(...), history: str = Form("")):
     question = (question or "").strip()
     if not 3 <= len(question) <= config.MAX_QUESTION_CHARS:
         return _error(400, f"Ask a question between 3 and {config.MAX_QUESTION_CHARS} characters.")
     data = image.file.read()
-    key = _cache_key(data, question)
+    turns = _parse_history(history)
+    key = _cache_key(data, question, turns)
     cached = _cache_get(key)
     if cached:                                     # repeat question: instant, free, not rate-limited
         log.info("ask cache hit")
@@ -132,7 +158,7 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
 
     t0 = time.time()
     try:
-        findings = llm.look(uri, question)
+        findings = llm.look(uri, question, turns)
     except llm.RefusalError:
         return _error(422, "The AI model declined to answer this request. Try a different image or question.")
     except llm.EngineError as e:
@@ -156,7 +182,7 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
     t2 = time.time()
 
     try:
-        text = llm.answer(question, findings, hits)
+        text = llm.answer(question, findings, hits, turns)
     except llm.RefusalError:
         return _error(422, "The AI model declined to answer this request. Try a different image or question.")
     except llm.EngineError as e:
@@ -164,6 +190,7 @@ def ask(request: Request, image: UploadFile = File(...), question: str = Form(..
         return _error(502, "The AI model is unavailable right now. Try again in a minute.")
     t3 = time.time()
 
+    text = _split_merged_citations(text, len(hits))
     cited = {int(n) for n in re.findall(r"\[(\d+)\]", text)}
     citations = [dict(n=i, title=h["title"], url=h["url"], source=h["source"], snippet=h["text"][:400],
                       score=h["score"], cited=i in cited) for i, h in enumerate(hits, 1)]

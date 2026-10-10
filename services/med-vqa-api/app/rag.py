@@ -7,6 +7,8 @@ from fastembed import TextEmbedding
 
 from . import config
 
+LOW_VALUE = "Human Phenotype Ontology provides the following list"
+
 
 class Retriever:
     def __init__(self, index_dir=config.INDEX_DIR):
@@ -70,6 +72,8 @@ class Retriever:
         picked, titles, per_url = [], set(), {}
 
         def take(hit, floor):
+            if LOW_VALUE in hit["text"]:                 # GARD/GHR pages that are only a symptom-frequency table
+                return False
             if hit["title"] in titles or hit["score"] < floor or per_url.get(hit["url"], 0) >= max_per_url:
                 return False
             picked.append(hit); titles.add(hit["title"]); per_url[hit["url"]] = per_url.get(hit["url"], 0) + 1
