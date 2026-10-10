@@ -15,6 +15,7 @@
           --accent: #5cc6cf; --accent-ink: #0f161c; --warn-bg: #33270f; --warn-ink: #f0c37a; --err: #f08a8f; color-scheme: dark; }
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }  /* .card sets display:grid, which would otherwise override the hidden attribute */
 body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
 main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; display: grid; gap: 20px; }
 h1 { font-size: 1.8rem; margin: 0; }
