@@ -10,7 +10,7 @@ export default function HomePage() {
       {/* Top bar */}
       <header className="mb-6 flex items-center justify-between border-b-2 border-[#d4d4d4] px-10 py-5">
         <span className="font-semibold tracking-tight text-[#141414]">jwes.design</span>
-        <span className="cursor-default text-[#4a4a4a] transition-colors duration-200 hover:text-[#141414]">Contributors</span>
+        <a href="#contributors" className="text-[#4a4a4a] transition-colors duration-200 hover:text-[#141414]">Contributors</a>
       </header>
 
       {/* Main */}
@@ -39,7 +39,22 @@ export default function HomePage() {
           </div>
         </div>
 
-        <p className="relative z-10 mt-8 pl-6 text-xs font-semibold uppercase tracking-[0.2em] text-[#6a6a6a]">Contributors:</p>
+        <a
+          href="/projects/med-vqa/"
+          className="relative z-10 ml-6 mt-6 inline-flex items-center gap-2 rounded-md border border-[#1a1a1a]/20 bg-white/70 px-4 py-2 text-sm font-medium text-[#141414] shadow-sm transition-colors duration-200 hover:border-[#1a1a1a]/50"
+        >
+          Try Med-VQA <span aria-hidden>→</span>
+        </a>
+
+        <p id="contributors" className="relative z-10 mt-8 pl-6 text-xs font-semibold uppercase tracking-[0.2em] text-[#6a6a6a]">Contributors:</p>
+        <ul className="relative z-10 mt-3 flex flex-wrap gap-x-6 gap-y-1 pl-6 text-sm text-[#2e2e2e]">
+          <li>
+            <a href="/jake/" className="underline-offset-4 transition-colors duration-200 hover:text-[#141414] hover:underline">
+              Jake Weber
+            </a>
+          </li>
+          <li>Evanton</li>
+        </ul>
       </main>
     </div>
   );
