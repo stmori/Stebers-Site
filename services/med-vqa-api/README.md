@@ -54,7 +54,7 @@ Response:
 
 Errors: `400` bad image or question, `422` the model declined to answer, `429` rate limited, `502` model unavailable. All return `{"error": "<message for the user>"}`.
 
-`GET /api/health` → `{"status": "ok", "provider": "anthropic", "model": "claude-haiku-5-5", "mock": false, "llm_configured": true, "index_passages": 16346, "index_cases": 3818, "nuclei_tool": true, "cached_answers": 0}`. Interactive docs at `/api/docs` on the container (port 8000); not exposed through Caddy.
+`GET /api/health` → `{"status": "ok", "provider": "anthropic", "model": "claude-haiku-5-5", "mock": false, "llm_configured": true, "index_passages": 16346, "index_cases": 3818, "nuclei_tool": true, "cached_answers": 0}`. Interactive docs at `/api/docs` only when `DOCS=1` is set (off by default, since Caddy forwards every `/api/med-vqa/*` path).
 
 ## Nuclei analysis tool (optional)
 

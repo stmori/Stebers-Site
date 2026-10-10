@@ -57,7 +57,7 @@ def look(image_data_uri, question, history=None):
 def answer(question, findings, hits, history=None, tools_text=""):
     if config.MOCK_LLM:
         return ("Mock answer: the image appears to show an opacity in the right upper lung [1]. "
-                "Conditions like this are described in the reference passages [2]. "
+                "Pneumonia and other infections can look like this [2]. "
                 "A qualified clinician should interpret any medical image.")
     msg = prompts.ANSWER_USER.format(history=prompts.format_history(history), question=question,
                                      modality=findings["modality"], body_region=findings["body_region"],
