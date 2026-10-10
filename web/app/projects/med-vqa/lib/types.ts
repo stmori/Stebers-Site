@@ -6,6 +6,7 @@ export interface Findings {
   body_region: string;
   observations: string[];
   short_answer: string;
+  search_terms?: string[];
 }
 
 export interface Citation {
@@ -24,7 +25,39 @@ export interface AskResponse {
   citations: Citation[];
   disclaimer: string;
   model: string;
-  timings_ms: { vision: number; retrieval: number; answer: number };
+  timings_ms: { vision: number; retrieval: number; answer: number; nuclei?: number };
+  similar_cases?: SimilarCase[];
+  cached?: boolean;
+  /** Results of optional specialist tools; present only when requested. */
+  analysis?: { nuclei?: NucleiAnalysis };
+}
+
+/** Nuclei segmentation (Jake's LoRA-fine-tuned MobileSAM). Only meaningful for H&E histology images. */
+export interface NucleiAnalysis {
+  status: "ok" | "not_applicable" | "no_nuclei" | "unavailable";
+  tool: string;
+  message: string;
+  count?: number;
+  coverage_pct?: number;
+  mean_area_px?: number;
+  density?: string;
+  /** JPEG data URI of the image with each detected nucleus colored. */
+  overlay?: string;
+}
+
+/** A past chest X-ray report similar to this image's findings (Open-I, text only). */
+export interface SimilarCase {
+  uid: number;
+  problems: string;
+  impression: string;
+  findings: string;
+  score: number;
+}
+
+/** An earlier question and answer about the same image, sent with follow-ups. */
+export interface HistoryTurn {
+  question: string;
+  answer: string;
 }
 
 export interface Example {
@@ -32,6 +65,8 @@ export interface Example {
   label: string;
   question: string;
   source: string;
+  /** Switch the nuclei-analysis toggle on when this example is picked (H&E examples). */
+  nuclei?: boolean;
 }
 
 export type ChatMessage =

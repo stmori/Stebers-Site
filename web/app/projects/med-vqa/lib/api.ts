@@ -1,4 +1,4 @@
-import type { AskResponse } from "./types";
+import type { AskResponse, HistoryTurn } from "./types";
 
 // In Docker, Caddy routes /api/med-vqa/* to the med-vqa-api container (rewritten to its /api/*).
 // For `next dev` against a locally running API, set NEXT_PUBLIC_MEDVQA_API=http://localhost:8000/api.
@@ -25,12 +25,20 @@ export function validate(file: File | null, question: string): string | null {
   return null;
 }
 
-export async function ask(image: File, question: string, signal?: AbortSignal): Promise<AskResponse> {
+export async function ask(
+  image: File,
+  question: string,
+  signal?: AbortSignal,
+  history: HistoryTurn[] = [],
+  options: { nuclei?: boolean } = {},
+): Promise<AskResponse> {
   if (MOCK) return mockAsk(question, signal);
 
   const body = new FormData();
   body.append("image", image);
   body.append("question", question.trim());
+  if (history.length) body.append("history", JSON.stringify(history));
+  if (options.nuclei) body.append("analyze_nuclei", "true");
 
   let res: Response;
   try {
