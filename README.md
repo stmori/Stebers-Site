@@ -10,7 +10,7 @@ Folders are split by what gets deployed, not by URL. The website is one app; eac
 web/                            # the whole website (Next.js)                       — Evanton
 ├── app/page.tsx                  /
 ├── app/projects/page.tsx         /projects/
-└── app/projects/med-vqa/         /projects/med-vqa/   (upload + chat UI)
+└── app/projects/med-vqa/         /projects/med-vqa/   (chat UI: page.tsx + its components/ and lib/)
 services/
 ├── med-vqa-api/                # FastAPI + ChromaDB retrieval, index scripts         — Jake
 └── med-vqa-inference/          # vision model on the CRCV cluster (bare-metal)       — Jake

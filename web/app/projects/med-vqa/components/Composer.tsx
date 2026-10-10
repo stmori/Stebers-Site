@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ACCEPTED_TYPES, MAX_QUESTION_CHARS } from "@/lib/med-vqa/api";
+import { ACCEPTED_TYPES, MAX_QUESTION_CHARS } from "../lib/api";
 
 export interface Attachment {
   url: string;

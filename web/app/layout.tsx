@@ -15,9 +15,8 @@ export const viewport: Viewport = {
   ],
 };
 
-// Root layout only sets up <html>/<body>. Pages pick a frame through route groups (folders in parentheses, not part of the URL):
-//   app/(site)/        normal pages with the nav bar and footer
-//   app/(fullscreen)/  full-height apps like the Med-VQA chat
+// Root layout only sets up <html>/<body>. Normal pages wrap themselves in <SiteFrame> (nav + footer);
+// full-screen apps like the Med-VQA chat don't.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">

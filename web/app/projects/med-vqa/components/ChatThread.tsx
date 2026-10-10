@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { ChatMessage } from "@/lib/med-vqa/types";
+import type { ChatMessage } from "../lib/types";
 import AnswerCard from "./AnswerCard";
 import LoadingSteps from "./LoadingSteps";
 

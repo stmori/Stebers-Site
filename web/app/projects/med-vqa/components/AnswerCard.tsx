@@ -1,4 +1,4 @@
-import type { AskResponse, Citation } from "@/lib/med-vqa/types";
+import type { AskResponse, Citation } from "../lib/types";
 
 /** Turns "text [1] more [2]" into text with links to each source. No HTML injection: everything is a React node. */
 function withCitations(paragraph: string, byN: Map<number, Citation>, keyPrefix: string) {

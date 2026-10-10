@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import ChatThread from "@/components/med-vqa/ChatThread";
-import Composer from "@/components/med-vqa/Composer";
-import { ACCEPTED_TYPES, ask, AskError, EXAMPLES_DIR, validate } from "@/lib/med-vqa/api";
-import examples from "@/lib/med-vqa/examples.json";
-import type { ChatMessage, Example } from "@/lib/med-vqa/types";
-import { useWindowFileDrop } from "@/lib/med-vqa/useWindowFileDrop";
+import ChatThread from "./components/ChatThread";
+import Composer from "./components/Composer";
+import { ACCEPTED_TYPES, ask, AskError, EXAMPLES_DIR, validate } from "./lib/api";
+import examples from "./lib/examples.json";
+import type { ChatMessage, Example } from "./lib/types";
+import { useWindowFileDrop } from "./lib/useWindowFileDrop";
 
 const EXAMPLES = examples as Example[];
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -17,7 +17,7 @@ interface Img {
   name: string;
 }
 
-export default function MedVqa() {
+export default function MedVqaPage() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [attachment, setAttachment] = useState<Img | null>(null); // attached for the next message

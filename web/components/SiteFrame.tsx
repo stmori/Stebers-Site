@@ -1,6 +1,7 @@
 import SiteNav from "@/components/SiteNav";
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+/** Nav bar + content + footer for normal pages. Full-screen apps (like the Med-VQA chat) skip it. */
+export default function SiteFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
       <SiteNav />
