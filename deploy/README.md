@@ -76,7 +76,7 @@ docker compose logs --tail 30 med-vqa-api                      # "nuclei tool: r
 | `https://yourdomain.tech/` | Home page, padlock (valid certificate) |
 | `https://www.yourdomain.tech/` | Same site |
 | `/projects/med-vqa/` → click the chest X-ray example | Cited answer in ~6 s |
-| `/projects/med-vqa/` → click the H&E example | Toggle switches to "Nuclei on"; answer + overlay panel (~110 nuclei, dense) |
+| `/projects/med-vqa/` → click the H&E example | Toggle switches to "Nuclei on"; answer + overlay panel (about 95 nuclei, dense cellularity) |
 | `/jake/` and a project page | Portfolio renders, images load |
 | `https://yourdomain.tech/nope` | 404 page |
 
