@@ -1,24 +1,24 @@
 [
  {
-  "file": "examples/openi_cxr_00.jpg",
+  "file": "openi_cxr_00.jpg",
   "label": "Chest X-ray",
   "question": "What abnormality is visible in this chest X-ray, and what could cause it?",
   "source": "Open-I/IU X-ray uid 818"
  },
  {
-  "file": "examples/openi_cxr_02.jpg",
+  "file": "openi_cxr_02.jpg",
   "label": "Chest X-ray",
   "question": "Is the heart enlarged? What would that mean?",
   "source": "Open-I/IU X-ray uid 1031"
  },
  {
-  "file": "examples/vqarad_09.jpg",
+  "file": "vqarad_09.jpg",
   "label": "CT scan",
   "question": "What kind of scan is this, and does anything look abnormal?",
   "source": "VQA-RAD test"
  },
  {
-  "file": "examples/openi_cxr_06.jpg",
+  "file": "openi_cxr_06.jpg",
   "label": "Chest X-ray",
   "question": "Does this chest X-ray look normal?",
   "source": "Open-I/IU X-ray uid 1151"

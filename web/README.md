@@ -6,7 +6,7 @@ The Med-VQA frontend (Next.js + Tailwind). Each URL is a folder under `app/` wit
 app/projects/med-vqa/page.tsx         /projects/med-vqa/   Med-VQA chat (dark)
 app/projects/med-vqa/components/      ChatThread, Composer, AnswerCard, LoadingSteps
 app/projects/med-vqa/lib/             API client (POST /api/med-vqa/ask), types, mock mode, examples, drag-and-drop hook
-public/projects/med-vqa/examples/     example images
+app/projects/med-vqa/examples/        example images (imported by examples/index.ts)
 ```
 
 Only `page.tsx` files become URLs, so a project's own components and helpers live next to its page.
