@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from PIL import Image, UnidentifiedImageError
 
-from . import config, llm
+from . import config, dicom, llm
 from .rag import Retriever
 
 log = logging.getLogger("medvqa")
@@ -80,17 +80,20 @@ def _error(status, message):
 
 
 def _prepare_image(data: bytes):
-    """Validate, downscale and re-encode as JPEG (drops EXIF and other metadata). Never written to disk."""
+    """Validate, convert DICOM, downscale and re-encode as JPEG (drops EXIF/DICOM headers). Never written to disk."""
     if len(data) > config.MAX_IMAGE_MB * 1024 * 1024:
         raise ValueError(f"Image is larger than {config.MAX_IMAGE_MB:g} MB.")
-    try:
-        img = Image.open(io.BytesIO(data))
-        img.load()
-    except (UnidentifiedImageError, OSError):
-        raise ValueError("That file isn't a readable image. Upload a PNG or JPEG.")
-    if img.format not in ("PNG", "JPEG", "WEBP"):
-        raise ValueError("Upload a PNG, JPEG or WebP image.")
-    img = img.convert("RGB")
+    if dicom.is_dicom(data):
+        img = dicom.to_image(data)
+    else:
+        try:
+            img = Image.open(io.BytesIO(data))
+            img.load()
+        except (UnidentifiedImageError, OSError):
+            raise ValueError("That file isn't a readable image. Upload a PNG, JPEG, WebP or DICOM (.dcm) file.")
+        if img.format not in ("PNG", "JPEG", "WEBP"):
+            raise ValueError("Upload a PNG, JPEG, WebP or DICOM (.dcm) file.")
+        img = img.convert("RGB")
     img.thumbnail((config.MAX_SIDE_PX, config.MAX_SIDE_PX))
     buf = io.BytesIO()
     img.save(buf, format="JPEG", quality=90)
