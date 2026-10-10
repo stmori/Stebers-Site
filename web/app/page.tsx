@@ -27,7 +27,7 @@ export default function HomePage() {
           <img
             src="/med-vqa-screenshot.png"
             alt="Med-VQA chat interface"
-            className="pointer-events-none absolute right-0 top-[45%] z-0 w-[48%] select-none rounded-xl opacity-40 shadow-2xl shadow-black/25 ring-1 ring-black/10 [mask-image:linear-gradient(to_right,rgba(0,0,0,0.45),black_20%)]"
+            className="pointer-events-none absolute right-0 top-[38%] z-0 w-[48%] select-none rounded-md opacity-40 shadow-2xl shadow-black/25 ring-1 ring-black/10 [mask-image:linear-gradient(to_right,rgba(0,0,0,0.45),black_20%)]"
           />
         </div>
 
