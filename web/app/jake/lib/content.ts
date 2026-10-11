@@ -1,11 +1,12 @@
-// Build-time loader for jake_projects/ (content lives outside web/ so it can change without touching the site).
+// Build-time loader for Jake's content in ../projects/jake/ (content lives outside web/ so it can change without touching the site).
 // Runs only on the server during `next build`; nothing here ships to the browser.
 import fs from "node:fs";
 import path from "node:path";
 import yaml from "js-yaml";
 import { marked } from "marked";
+import { PROJECTS_DIR } from "../../lib/projects";
 
-const ROOT = process.env.JAKE_PROJECTS_DIR || path.resolve(process.cwd(), "..", "jake_projects");
+const ROOT = process.env.JAKE_PROJECTS_DIR || path.join(PROJECTS_DIR, "jake");
 
 export type Link = { label: string; url: string };
 export type Metric = { value: string; label: string };
@@ -56,12 +57,12 @@ function read(file: string): { data: Record<string, unknown>; html: string } {
   return { data: (yaml.load(m[1]) as Record<string, unknown>) || {}, html: marked.parse(m[2], { async: false }) as string };
 }
 
-/** Media paths in project.md are relative to the project folder; copy-jake-media puts them under /jake/<folder>/. */
+/** Media paths in project.md are relative to the project folder; copy-project-media puts them under /media/jake/<folder>/. */
 function mediaUrl(folder: string, rel?: string | null): string | null {
   if (!rel) return null;
   if (/^https?:\/\//.test(rel)) return rel;
   const file = path.join(ROOT, folder, rel);
-  return fs.existsSync(file) ? `/jake/${folder}/${rel.replace(/^\.\//, "")}` : null;
+  return fs.existsSync(file) ? `/media/jake/${folder}/${rel.replace(/^\.\//, "")}` : null;
 }
 
 export function getProjects(): Project[] {

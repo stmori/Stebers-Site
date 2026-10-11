@@ -1,4 +1,4 @@
-/* Styles for the Markdown write-ups rendered from jake_projects/ (no typography plugin needed). */
+/* Styles for the Markdown write-ups rendered from projects/jake/ (no typography plugin needed). */
 .jake-prose { line-height: 1.7; color: var(--color-ink); min-width: 0; overflow-wrap: anywhere; }
 .jake-prose > * + * { margin-top: 1rem; }
 .jake-prose h2 { margin-top: 2.25rem; font-size: 1.25rem; font-weight: 650; letter-spacing: -0.01em; }

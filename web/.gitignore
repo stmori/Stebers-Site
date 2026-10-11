@@ -4,5 +4,7 @@ out/
 .env.local
 next-env.d.ts
 *.tsbuildinfo
-# copied from ../jake_projects by scripts/copy-jake-media.mjs
+# copied from ../projects by scripts/copy-project-media.mjs
+public/media/
+# old location of the copy, before projects/ (safe to delete locally)
 public/jake/

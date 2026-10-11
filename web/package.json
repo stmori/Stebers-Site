@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node scripts/copy-jake-media.mjs",
+    "predev": "node scripts/copy-project-media.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/copy-jake-media.mjs",
+    "prebuild": "node scripts/copy-project-media.mjs",
     "build": "next build",
     "start": "npx serve out",
     "lint": "next lint"
