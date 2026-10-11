@@ -1,9 +1,9 @@
-# jake_projects
+# projects/jake
 
 Content for Jake Weber's portfolio: one folder per project, plus a profile. **This folder holds content only.** The website (`web/app/jake/`) renders it at `/jake/` at build time, so the design can change without touching the content, and adding a project means adding a folder.
 
 ```
-jake_projects/
+projects/jake/
 ├── profile/
 │   ├── profile.md          bio, links, education, skills, certifications, activities
 │   └── media/              headshot.jpg (to be added)

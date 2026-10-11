@@ -27,7 +27,7 @@ tech: [Python, PyTorch, DINOv3, Hugging Face Hub, Rasterio, PyProj, GeoTIFF, Goo
 links:
   - {label: "Source", url: "https://github.com/Jeber811/CVGL-Challenge"}
   - {label: "Official leaderboard", url: "https://www.codabench.org/competitions/16082/#/results-tab"}
-cover: media/certificate.jpg
+cover: media/certificate-cover.jpg   # top of the certificate (wide crop); the full certificate stays in gallery
 gallery:
   - {src: media/certificate.jpg, alt: "IARPA certificate of achievement: WRIVA CVGL Challenge 2026, leaderboard rank 15, final score 107.36, presented to Jake Weber",
      caption: "IARPA certificate of achievement (August 2026)"}

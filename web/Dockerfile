@@ -5,8 +5,8 @@ WORKDIR /app
 COPY web/package*.json ./
 RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 COPY web/ ./
-# Jake's portfolio content (rendered at /jake/); the loader reads it from ../jake_projects
-COPY jake_projects/ /jake_projects/
+# Project content (home page and /jake/ pages); the loaders read it from ../projects
+COPY projects/ /projects/
 RUN npm run build
 
 FROM caddy:2-alpine

@@ -9,13 +9,15 @@ app/projects/med-vqa/lib/             API client (POST /api/med-vqa/ask), types,
 public/projects/med-vqa/examples/     example images
 ```
 
-Jake's portfolio is generated from `../jake_projects/` (content only, see its README) at build time:
+The home page and Jake's portfolio are generated from `../projects/` (content only) at build time:
 
 ```
+app/page.tsx                          /                    one section per project in projects/<person>/, newest first
+app/lib/projects.ts                   shared loader: front matter, media URLs, home page sections
 app/jake/page.tsx                     /jake/               profile + project cards
 app/jake/[slug]/page.tsx              /jake/<slug>/        one page per project folder (published: true)
 app/jake/lib/content.ts               reads project.md / profile.md (YAML front matter + Markdown)
-scripts/copy-jake-media.mjs           copies jake_projects/*/media/ to public/jake/ before dev/build (gitignored)
+scripts/copy-project-media.mjs        copies projects/<person>/*/media/ to public/media/ before dev/build (gitignored)
 ```
 
 Only `page.tsx` files become URLs, so a project's own components and helpers live next to its page.

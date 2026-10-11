@@ -1,21 +1,12 @@
 import { Arimo } from "next/font/google";
-import ProjectEntry, { type Project } from "./components/ProjectEntry";
+import ProjectEntry from "./components/ProjectEntry";
+import { getHomeProjects } from "./lib/projects";
 
 const arimo = Arimo({ subsets: ["latin"] });
 
-// One entry per project, shown top to bottom. To add a project, add an object here.
-const projects: Project[] = [
-  {
-    title: "MED VQA",
-    description:
-      "Users can upload medical imagery (such as X-rays, MRIs, or histology slides), and the system uses a Vision-Language Model (VLM) combined with a Vector Database to identify physical anomalies, retrieve relevant medical literature, and generate a cited diagnostic summary. To demonstrate cloud infrastructure and MLOps competency, the entire application will be decoupled into microservices and containerized using Docker.",
-    contributors: [{ name: "Jake Weber", href: "/jake/" }, { name: "Evanton" }],
-    image: { src: "/med-vqa-screenshot.png", alt: "Med-VQA chat interface" },
-    link: { href: "/projects/med-vqa/", label: "Try Med-VQA" },
-  },
-];
-
 export default function HomePage() {
+  // One section per project in ../projects/<person>/<project>/, newest first. Generated at build time.
+  const projects = getHomeProjects();
   return (
     <div
       className={`${arimo.className} min-h-screen bg-[#f5f5f2] text-[#1a1a1a] antialiased [background-image:radial-gradient(rgba(0,0,0,0.045)_1px,transparent_1px),radial-gradient(ellipse_at_top_left,#fdfdfb_0%,#f5f5f2_55%,#efefeb_100%)] [background-size:22px_22px,100%_100%]`}
@@ -29,7 +20,7 @@ export default function HomePage() {
       </header>
 
       {/* Main */}
-      <main className="space-y-12 px-8 pb-24">
+      <main className="space-y-6 px-8 pb-24">
         {projects.map((project, i) => (
           <ProjectEntry key={project.title} {...project} contributorsId={i === 0 ? "contributors" : undefined} />
         ))}
