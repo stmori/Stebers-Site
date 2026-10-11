@@ -1,12 +1,25 @@
+export interface Contributor {
+  name: string;
+  /** Optional link, e.g. a portfolio page */
+  href?: string;
+}
+
 export interface Project {
   title: string;
   description: string;
-  contributors: string[];
+  contributors: Contributor[];
   /** Optional screenshot shown faded behind the lower-right of the description. File goes in web/public/. */
   image?: { src: string; alt: string };
+  /** Optional button under the description, e.g. to open the project */
+  link?: { href: string; label: string };
 }
 
-export default function ProjectEntry({ title, description, contributors, image }: Project) {
+interface Props extends Project {
+  /** id for the contributors block, so the top bar's "Contributors" link can jump to it */
+  contributorsId?: string;
+}
+
+export default function ProjectEntry({ title, description, contributors, image, link, contributorsId }: Props) {
   return (
     // Bottom padding scales with the screenshot's height so the border always sits below it
     <article
@@ -24,7 +37,7 @@ export default function ProjectEntry({ title, description, contributors, image }
 
         {image && (
           // Wrapper carries the shadow and a slight 3D tilt; the image keeps the opacity and fade
-          <div className="pointer-events-none absolute right-4 top-[39%] z-0 w-[50%] rounded-lg shadow-[0_40px_80px_-30px_rgba(0,0,0,0.30),0_18px_36px_-18px_rgba(0,0,0,0.18)] [transform:perspective(1800px)_rotateY(-6deg)_rotateX(2deg)] [transform-origin:right_center]">
+          <div className="pointer-events-none absolute right-4 top-[21%] z-0 w-[51%] rounded-lg shadow-[0_40px_80px_-30px_rgba(0,0,0,0.30),0_18px_36px_-18px_rgba(0,0,0,0.18)] [transform:perspective(1800px)_rotateY(-6deg)_rotateX(2deg)] [transform-origin:right_center]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={image.src}
@@ -35,11 +48,28 @@ export default function ProjectEntry({ title, description, contributors, image }
         )}
       </div>
 
-      <div className="relative z-10 mt-8 pl-6">
+      {link && (
+        <a
+          href={link.href}
+          className="relative z-10 ml-6 mt-6 inline-flex items-center gap-2 rounded-md border border-[#1a1a1a]/20 bg-white/70 px-4 py-2 text-sm font-medium text-[#141414] shadow-sm transition-colors duration-200 hover:border-[#1a1a1a]/50"
+        >
+          {link.label} <span aria-hidden>→</span>
+        </a>
+      )}
+
+      <div id={contributorsId} className="relative z-10 mt-8 pl-6">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#6a6a6a]">Contributors:</p>
         <ul className="mt-2 space-y-0.5 text-base text-[#2e2e2e]">
-          {contributors.map((name) => (
-            <li key={name}>{name}</li>
+          {contributors.map((c) => (
+            <li key={c.name}>
+              {c.href ? (
+                <a href={c.href} className="underline-offset-4 transition-colors duration-200 hover:text-[#141414] hover:underline">
+                  {c.name}
+                </a>
+              ) : (
+                c.name
+              )}
+            </li>
           ))}
         </ul>
       </div>
